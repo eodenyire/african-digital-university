@@ -1,12 +1,13 @@
 import { Code, Brain, Landmark, Globe, Shield, Cpu } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const schools = [
-  { icon: Code, title: "Software Engineering", desc: "Backend, frontend, DevOps & systems programming. Build real products for the African ecosystem.", color: "bg-primary" },
-  { icon: Brain, title: "AI & Data Science", desc: "Machine learning, data engineering & African dataset modeling for agriculture, finance & health.", color: "bg-accent" },
-  { icon: Landmark, title: "FinTech & Digital Banking", desc: "Payment systems, core banking, risk modeling & GRC — powering Africa's financial revolution.", color: "bg-secondary" },
-  { icon: Globe, title: "Internet Systems", desc: "Search engines, video platforms & distributed systems at continental scale.", color: "bg-primary" },
-  { icon: Shield, title: "GovTech & Public Systems", desc: "Digital ID, tax systems, land registries & smart city infrastructure.", color: "bg-accent" },
-  { icon: Cpu, title: "Cloud & Infrastructure", desc: "AfriCloud-focused compute, storage, hosting & modern DevOps practices.", color: "bg-secondary" },
+  { icon: Code, title: "Software Engineering", slug: "software-engineering", desc: "Backend, frontend, DevOps & systems programming. Build real products for the African ecosystem.", color: "bg-primary" },
+  { icon: Brain, title: "AI & Data Science", slug: "ai-data-science", desc: "Machine learning, data engineering & African dataset modeling for agriculture, finance & health.", color: "bg-accent" },
+  { icon: Landmark, title: "FinTech & Digital Banking", slug: "fintech-digital-banking", desc: "Payment systems, core banking, risk modeling & GRC — powering Africa's financial revolution.", color: "bg-secondary" },
+  { icon: Globe, title: "Internet Systems", slug: "internet-systems", desc: "Search engines, video platforms & distributed systems at continental scale.", color: "bg-primary" },
+  { icon: Shield, title: "GovTech & Public Systems", slug: "govtech-public-systems", desc: "Digital ID, tax systems, land registries & smart city infrastructure.", color: "bg-accent" },
+  { icon: Cpu, title: "Cloud & Infrastructure", slug: "cloud-infrastructure", desc: "AfriCloud-focused compute, storage, hosting & modern DevOps practices.", color: "bg-secondary" },
 ];
 
 const Programs = () => {
@@ -24,13 +25,20 @@ const Programs = () => {
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {schools.map((s) => (
-            <div key={s.title} className="group p-8 rounded-2xl bg-card border border-border hover:shadow-elevated transition-all duration-300 hover:-translate-y-1">
+            <Link
+              to={`/school/${s.slug}`}
+              key={s.title}
+              className="group p-8 rounded-2xl bg-card border border-border hover:shadow-elevated transition-all duration-300 hover:-translate-y-1"
+            >
               <div className={`w-12 h-12 rounded-xl ${s.color} flex items-center justify-center mb-5`}>
                 <s.icon className="w-6 h-6 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">{s.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
-            </div>
+              <span className="inline-block mt-4 text-sm font-semibold text-secondary group-hover:translate-x-1 transition-transform">
+                View Curriculum →
+              </span>
+            </Link>
           ))}
         </div>
       </div>
