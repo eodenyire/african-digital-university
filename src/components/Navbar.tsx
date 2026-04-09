@@ -1,5 +1,6 @@
-import { GraduationCap, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import aduLogo from "@/assets/adu-logo.png";
 
 const Navbar = () => {
@@ -18,9 +19,9 @@ const Navbar = () => {
               {l}
             </a>
           ))}
-          <a href="#apply" className="px-5 py-2 rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm hover:brightness-110 transition">
-            Enroll Now
-          </a>
+          <Link to="/auth" className="px-5 py-2 rounded-lg bg-secondary text-secondary-foreground font-semibold text-sm hover:brightness-110 transition">
+            Student Portal
+          </Link>
         </div>
         <button className="md:hidden text-primary-foreground" onClick={() => setOpen(!open)}>
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -33,9 +34,9 @@ const Navbar = () => {
               {l}
             </a>
           ))}
-          <a href="#apply" className="block mt-2 px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-semibold text-center">
-            Enroll Now
-          </a>
+          <Link to="/auth" className="block mt-2 px-5 py-2.5 rounded-lg bg-secondary text-secondary-foreground font-semibold text-center" onClick={() => setOpen(false)}>
+            Student Portal
+          </Link>
         </div>
       )}
     </nav>
