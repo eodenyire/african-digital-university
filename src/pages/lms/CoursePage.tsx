@@ -88,7 +88,7 @@ const CoursePage = () => {
       <nav className="bg-foreground border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 h-14 flex items-center gap-4">
           <Link to="/lms/dashboard" className="flex items-center gap-2">
-            <img src={aduLogo} alt="ADU" className="w-7 h-7" />
+            <img src={aduLogo} alt="ADU" className="w-7 h-7 brightness-0 invert" />
           </Link>
           <ArrowLeft className="w-4 h-4 text-primary-foreground/40" />
           <span className="text-sm text-primary-foreground font-medium truncate">

@@ -69,7 +69,7 @@ const Dashboard = () => {
       <nav className="bg-foreground border-b border-border sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <img src={aduLogo} alt="ADU" className="w-8 h-8" />
+            <img src={aduLogo} alt="ADU" className="w-8 h-8 brightness-0 invert" />
             <span className="font-bold text-primary-foreground">ADU Learning Portal</span>
           </Link>
           <div className="flex items-center gap-4">
