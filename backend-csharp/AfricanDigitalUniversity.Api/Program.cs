@@ -37,8 +37,12 @@ else
     // service and handle the absence gracefully.
     builder.Services.AddDbContext<SupabaseDbContext>(options =>
         options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
-    Console.WriteLine("[ADU] SupabaseConnection not configured – Supabase replication disabled.");
+if (!supabaseEnabled)
+{
+    var startupLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<Program>();
+    startupLogger.LogWarning("SupabaseConnection not configured – Supabase replication disabled.");
 }
 
 // ── JWT Authentication ─────────────────────────────────────────────────────

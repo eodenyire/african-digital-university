@@ -16,6 +16,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useCallback,
   ReactNode,
 } from "react";
 import { isCsharpBackendAvailable } from "@/integrations/csharp/client";
@@ -50,7 +51,7 @@ export const BackendProvider = ({ children }: { children: ReactNode }) => {
   const [activeBackend, setActiveBackend] = useState<BackendType>("supabase");
   const [checking, setChecking] = useState(csharpConfigured);
 
-  const probe = async () => {
+  const probe = useCallback(async () => {
     if (!csharpConfigured) {
       setActiveBackend("supabase");
       setChecking(false);
@@ -60,15 +61,13 @@ export const BackendProvider = ({ children }: { children: ReactNode }) => {
     const available = await isCsharpBackendAvailable();
     setActiveBackend(available ? "csharp" : "supabase");
     setChecking(false);
-  };
+  }, [csharpConfigured]);
 
   useEffect(() => {
     probe();
     const interval = setInterval(probe, PROBE_INTERVAL_MS);
     return () => clearInterval(interval);
-    // probe is stable (no deps change between renders)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [probe]);
 
   return (
     <BackendContext.Provider
