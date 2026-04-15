@@ -1,4 +1,4 @@
-import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, LucideIcon } from "lucide-react";
+import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, LucideIcon } from "lucide-react";
 
 export interface Course {
   code: string;
@@ -612,6 +612,95 @@ export const schoolsData: SchoolData[] = [
               { code: "FS308", title: "Terraform & Infrastructure as Code", credits: 3, description: "HCL syntax, providers (AWS), resources, state management, modules, workspaces, and provisioning a complete cloud environment from code. Checkpoint: infrastructure as code." },
               { code: "FS309", title: "Monitoring, Alerting & Observability", credits: 3, description: "Application-level monitoring with Monit, structured logging, uptime monitoring, alerting on failures, and an introduction to Prometheus and Grafana for metrics dashboards." },
               { code: "FS310", title: "Full-Stack Development Capstone", credits: 6, description: "Design, build, deploy, and operate a production-grade full-stack platform that solves a real African problem. The capstone must include: a React frontend, a Node.js API, PostgreSQL + Redis, full authentication, automated CI/CD via GitHub Actions, infrastructure provisioned with Terraform, and live monitoring. Presented to an industry panel." },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "backend-development",
+    icon: Server,
+    title: "School of Backend Development",
+    shortTitle: "Backend Development",
+    color: "hsl(260, 60%, 45%)",
+    colorClass: "bg-[hsl(260,60%,45%)]",
+    tagline: "Power the logic, data, and scale behind every great product",
+    description: "A rigorous three-year bootcamp following the roadmap.sh backend developer roadmap. Students master the complete backend stack — from internet fundamentals and server-side languages through APIs, security, databases, and containers — all the way to distributed systems, message brokers, and production-scale architecture. Graduate ready to build and operate any backend system in the world.",
+    highlights: [
+      "Internet & protocol foundations before writing a single server",
+      "Language-agnostic principles taught through Node.js, Go, and Python",
+      "Full database mastery: relational, NoSQL, caching, and scaling strategies",
+      "Production-grade security, observability, and architecture patterns",
+    ],
+    careerPaths: ["Backend Engineer", "API Engineer", "Database Engineer", "Node.js Developer", "Go Developer", "Platform Engineer", "Site Reliability Engineer", "Software Architect"],
+    tools: ["Node.js", "Go", "Python", "PostgreSQL", "MySQL", "Redis", "MongoDB", "Docker", "Kubernetes", "Nginx", "Kafka", "RabbitMQ", "Elasticsearch", "Git", "GitHub Actions", "GraphQL", "gRPC"],
+    curriculum: [
+      {
+        year: 1, label: "Backend Foundations",
+        semesters: [
+          {
+            name: "Semester 1 — Internet, Languages & Version Control", courses: [
+              { code: "BD101", title: "How the Internet Works", credits: 3, description: "How the internet works end-to-end: HTTP/HTTPS request-response lifecycle, DNS resolution, domain names, hosting, browsers, IP addressing, TCP/IP, and SSL/TLS. Build a mental model of every layer your code touches." },
+              { code: "BD102", title: "Pick a Language: Node.js (JavaScript)", credits: 4, description: "The Node.js runtime as a primary backend language: event loop, modules, the built-in HTTP module, streams, buffers, async/await, and the ecosystem. Students also survey Go and Python so they can pick any language confidently." },
+              { code: "BD103", title: "Git & Version Control Systems", credits: 3, description: "Git internals, branching strategies, rebasing, merging, conflict resolution, tagging, and stash. Repo hosting services: GitHub, GitLab, and Bitbucket — pull requests, code reviews, and team workflows." },
+              { code: "BD104", title: "Relational Databases & SQL", credits: 4, description: "Relational model, database design, and SQL mastery: SELECT, JOINs, aggregates, subqueries, window functions, transactions, and constraints. Primary databases: PostgreSQL and MySQL; awareness of MariaDB, MS SQL, Oracle, and SQLite." },
+              { code: "BD105", title: "Operating Systems & Terminal Basics", credits: 2, description: "Linux command line, file permissions, processes, signals, environment variables, package managers, and shell scripting — the daily environment of every backend engineer." },
+            ],
+          },
+          {
+            name: "Semester 2 — APIs, Authentication & Caching", courses: [
+              { code: "BD106", title: "Designing & Building RESTful APIs", credits: 4, description: "REST principles, resource design, HTTP verbs, status codes, pagination, filtering, versioning, HATEOAS, Open API Specification (Swagger), and JSON APIs. Build a fully documented, standards-compliant REST API from scratch." },
+              { code: "BD107", title: "API Authentication & Authorization", credits: 4, description: "Every mainstream auth approach: JWT (JSON Web Tokens), OAuth 2.0 flows, Basic Authentication, Token Authentication, Cookie-Based Auth, OpenID Connect, and SAML. Implement each pattern and understand when to choose one over another." },
+              { code: "BD108", title: "Caching Strategies", credits: 3, description: "Why caching exists and how to use it: Redis and Memcached as key-value stores, server-side caching with in-memory stores and databases, CDN caching, client-side caching, cache invalidation strategies, and TTL management." },
+              { code: "BD109", title: "Web Security Fundamentals", credits: 3, description: "Hashing algorithms (MD5, SHA, scrypt, bcrypt) and when to use each. HTTPS, SSL/TLS certificates, CORS, CSP, server security hardening, OWASP Top 10 risks, and API security best practices." },
+              { code: "BD110", title: "Checkpoint Project: Secure REST API", credits: 3, description: "Build and deploy a fully authenticated REST API with JWT, bcrypt password hashing, HTTPS, rate limiting, input validation, and OpenAPI documentation — a production-ready backend service." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 2, label: "Intermediate Backend & Systems Thinking",
+        semesters: [
+          {
+            name: "Semester 3 — Testing, CI/CD & Advanced Databases", courses: [
+              { code: "BD201", title: "Testing Backend Systems", credits: 3, description: "Unit testing, integration testing, and functional testing for backend services. Test frameworks (Jest, Vitest, pytest, Go test), test doubles (mocks, stubs, spies), test coverage, and writing tests that actually catch bugs." },
+              { code: "BD202", title: "CI/CD for Backend Engineers", credits: 3, description: "Continuous integration and deployment pipelines: GitHub Actions workflows, automated test runs, build artefacts, containerised builds, deployment to cloud environments, environment management, and rollback strategies." },
+              { code: "BD203", title: "ORMs & Advanced Database Patterns", credits: 4, description: "ORMs (Prisma, TypeORM, SQLAlchemy, GORM): model definitions, migrations, relationships, and query building. ACID properties, transaction isolation levels, the N+1 query problem, database normalization, and failure modes." },
+              { code: "BD204", title: "Scaling Relational Databases", credits: 4, description: "Database indexes (B-tree, hash, partial, composite), query optimization and EXPLAIN ANALYZE, read replicas and data replication, horizontal sharding strategies, the CAP theorem, and profiling performance bottlenecks." },
+              { code: "BD205", title: "gRPC & GraphQL APIs", credits: 3, description: "Beyond REST: gRPC (Protocol Buffers, service definitions, streaming), SOAP basics, and GraphQL (schema-first design, resolvers, mutations, subscriptions, DataLoader for N+1 prevention). Choose the right API style for the job." },
+            ],
+          },
+          {
+            name: "Semester 4 — Containers, Architecture & Design Principles", courses: [
+              { code: "BD206", title: "Containerisation & Virtualisation", credits: 4, description: "Docker in depth: Dockerfiles, multi-stage builds, Docker Compose, container networking, volumes, and registries. LXC containers and the difference between containerisation and virtualisation. Deploy a multi-service application with Docker Compose." },
+              { code: "BD207", title: "Kubernetes & Container Orchestration", credits: 3, description: "Kubernetes architecture, Pods, Deployments, Services, ConfigMaps, Secrets, Ingress, Persistent Volumes, Helm charts, rolling updates, and health checks. Operate production workloads on a Kubernetes cluster." },
+              { code: "BD208", title: "Software Design & Architectural Patterns", credits: 4, description: "Architectural patterns in depth: Monolithic Apps, Microservices, SOA, Serverless, Service Mesh, and the Twelve-Factor App methodology. Choose the right architecture for a given problem and understand trade-offs." },
+              { code: "BD209", title: "Design & Development Principles", credits: 3, description: "GOF Design Patterns (creational, structural, behavioural), Domain-Driven Design (bounded contexts, aggregates, ubiquitous language), Test-Driven Development, CQRS, and Event Sourcing." },
+              { code: "BD210", title: "Checkpoint Project: Microservices Platform", credits: 4, description: "Decompose a monolith into independently deployable microservices: separate services communicate via REST and gRPC, containerised with Docker, orchestrated with Kubernetes, with a CI/CD pipeline and comprehensive test suite." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 3, label: "Advanced Backend, Scale & Production Systems",
+        semesters: [
+          {
+            name: "Semester 5 — NoSQL, Real-Time Data & Messaging", courses: [
+              { code: "BD301", title: "NoSQL Databases", credits: 4, description: "The full NoSQL landscape: Document databases (MongoDB, CouchDB), Key-Value stores (Redis, DynamoDB), Realtime databases (Firebase, RethinkDB), Time-Series databases (InfluxDB, TimescaleDB), Column-family databases (Cassandra, HBase), and Graph databases (Neo4j, AWS Neptune). Choose the right database for each workload." },
+              { code: "BD302", title: "Message Brokers & Event-Driven Architecture", credits: 4, description: "Asynchronous messaging with RabbitMQ (exchanges, queues, routing) and Apache Kafka (topics, partitions, consumer groups, exactly-once delivery). Event-driven architecture patterns, outbox pattern, and saga orchestration for distributed transactions." },
+              { code: "BD303", title: "Real-Time Data & Web Communication", credits: 3, description: "WebSockets (full-duplex communication), Server-Sent Events (SSE), Long Polling, Short Polling, and GraphQL subscriptions. Build real-time features: live dashboards, chat, notifications, and collaborative editing." },
+              { code: "BD304", title: "Search Engines & Full-Text Search", credits: 3, description: "Elasticsearch: indexing, mappings, full-text search, relevance scoring, aggregations, and Kibana for visualisation. Apache Solr as an alternative. Integrate production-quality search into a backend service." },
+              { code: "BD305", title: "Web Servers & Reverse Proxies", credits: 2, description: "Nginx, Apache, Caddy, and MS IIS: static file serving, reverse proxying, load balancing, SSL termination, HTTP/2, rate limiting, and caching headers. Configure a production-hardened Nginx setup." },
+            ],
+          },
+          {
+            name: "Semester 6 — Building for Scale, Observability & Capstone", courses: [
+              { code: "BD306", title: "Building for Scale", credits: 4, description: "Mitigation strategies (Graceful Degradation, Throttling, Backpressure, Loadshifting, Circuit Breaker), horizontal vs vertical scaling, database migration strategies, blue-green and canary deployments, and capacity planning for continental-scale traffic." },
+              { code: "BD307", title: "Observability, Monitoring & Telemetry", credits: 3, description: "The three pillars of observability: metrics, logs, and traces. Instrumentation with OpenTelemetry, Prometheus for metrics collection, Grafana for dashboards, structured logging, distributed tracing (Jaeger), and building alerts that reduce toil." },
+              { code: "BD308", title: "Basic Infrastructure Knowledge & DevOps", credits: 3, description: "Core infrastructure concepts every backend engineer needs: servers, networking (VPC, subnets, security groups), object storage (S3), managed databases, IAM, and an introduction to Terraform for infrastructure-as-code. Cross-references the DevOps roadmap." },
+              { code: "BD309", title: "Backend Security & Performance Hardening", credits: 2, description: "Profiling and performance optimisation: CPU and memory profiling, query analysis, connection pooling, caching audit, and database migrations with zero downtime. Penetration testing basics and dependency vulnerability management." },
+              { code: "BD310", title: "Backend Development Capstone", credits: 6, description: "Design, build, deploy, and operate a production-grade backend platform that solves a real African challenge. Requirements: polyglot persistence (relational + NoSQL + cache), asynchronous processing via Kafka or RabbitMQ, real-time capability via WebSockets, Kubernetes deployment, full observability (metrics + logs + traces), automated CI/CD, and infrastructure as code. Defended before an industry panel." },
             ],
           },
         ],

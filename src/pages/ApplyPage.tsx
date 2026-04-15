@@ -14,7 +14,7 @@ const SCHOOLS = [
   { slug: "software-engineering", label: "Software Engineering" },
   { slug: "ai-data-science", label: "AI & Data Science" },
   { slug: "fullstack-development", label: "Full Stack Development" },
-  { slug: "backend-engineering", label: "Backend Engineering" },
+  { slug: "backend-development", label: "Backend Development" },
   { slug: "frontend-engineering", label: "Frontend Engineering" },
   { slug: "cloud-engineering", label: "Cloud Engineering" },
   { slug: "data-engineering", label: "Data Engineering" },
