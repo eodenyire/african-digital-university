@@ -2,11 +2,15 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { Users, BookOpen, GraduationCap, LogOut, CheckCircle, XCircle, Clock, Shield, BarChart3 } from "lucide-react";
+import {
+  Users, BookOpen, GraduationCap, LogOut, CheckCircle, XCircle,
+  Clock, Shield, BarChart3, Award, Video, FolderOpen, Plus
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import aduLogo from "@/assets/adu-logo.png";
 import { useState } from "react";
 import { BackendStatus } from "@/components/BackendStatus";
@@ -24,11 +28,26 @@ const SCHOOL_LABELS: Record<string, string> = {
   "product-design": "Product Design & UX",
 };
 
+const SCHOOL_PROGRAM_LABELS: Record<string, string> = {
+  "software-engineering": "3-Year Software Engineering Bootcamp Program",
+  "ai-data-science": "3-Year AI & Data Science Bootcamp Program",
+  "backend-engineering": "3-Year Backend Engineering Bootcamp Program",
+  "frontend-engineering": "3-Year Frontend Engineering Bootcamp Program",
+  "cloud-engineering": "3-Year Cloud Engineering Bootcamp Program",
+  "data-engineering": "3-Year Data Engineering Bootcamp Program",
+  "fintech-digital-banking": "3-Year FinTech & Digital Banking Bootcamp Program",
+  "internet-systems": "3-Year Internet Systems Bootcamp Program",
+  "cybersecurity": "3-Year Cybersecurity Bootcamp Program",
+  "product-design": "3-Year Product Design & UX Bootcamp Program",
+};
+
 const AdminDashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [newVilt, setNewVilt] = useState({ title: "", scheduled_at: "", meeting_link: "", description: "" });
+  const [addingVilt, setAddingVilt] = useState(false);
 
   // Check admin role
   const { data: isAdmin, isLoading: checkingRole } = useQuery({
@@ -87,6 +106,55 @@ const AdminDashboard = () => {
     enabled: !!isAdmin,
   });
 
+  // VILT sessions
+  const { data: viltSessions } = useQuery({
+    queryKey: ["admin-vilt-sessions"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("vilt_sessions")
+        .select("*")
+        .order("scheduled_at", { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!isAdmin,
+  });
+
+  // VILT attendance
+  const { data: viltAttendance } = useQuery({
+    queryKey: ["admin-vilt-attendance"],
+    queryFn: async () => {
+      const { data } = await supabase.from("vilt_attendance").select("session_id, user_id");
+      return data ?? [];
+    },
+    enabled: !!isAdmin,
+  });
+
+  // Capstone submissions
+  const { data: capstoneSubs } = useQuery({
+    queryKey: ["admin-capstone-subs"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("capstone_submissions")
+        .select("*, profiles!inner(full_name)")
+        .order("submitted_at", { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!isAdmin,
+  });
+
+  // Issued certificates
+  const { data: issuedCerts } = useQuery({
+    queryKey: ["admin-certificates"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("certificates")
+        .select("*, profiles!inner(full_name)")
+        .order("issued_at", { ascending: false });
+      return data ?? [];
+    },
+    enabled: !!isAdmin,
+  });
+
   const handleApplication = async (appId: string, status: "approved" | "rejected") => {
     setProcessingId(appId);
     try {
@@ -105,6 +173,73 @@ const AdminDashboard = () => {
       }
 
       queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleCreateVilt = async () => {
+    if (!newVilt.title || !newVilt.scheduled_at) return;
+    setAddingVilt(true);
+    try {
+      await supabase.from("vilt_sessions").insert({
+        title: newVilt.title,
+        scheduled_at: newVilt.scheduled_at,
+        meeting_link: newVilt.meeting_link || null,
+        description: newVilt.description || null,
+        is_required: true,
+      });
+      setNewVilt({ title: "", scheduled_at: "", meeting_link: "", description: "" });
+      queryClient.invalidateQueries({ queryKey: ["admin-vilt-sessions"] });
+    } finally {
+      setAddingVilt(false);
+    }
+  };
+
+  const handleMarkAttendance = async (sessionId: string, userId: string) => {
+    await supabase.from("vilt_attendance").insert({
+      session_id: sessionId,
+      user_id: userId,
+      marked_by: user!.id,
+    });
+    queryClient.invalidateQueries({ queryKey: ["admin-vilt-attendance"] });
+  };
+
+  const handleCapstoneReview = async (subId: string, status: "approved" | "rejected") => {
+    setProcessingId(subId);
+    try {
+      await supabase
+        .from("capstone_submissions")
+        .update({ status, reviewed_by: user!.id, reviewed_at: new Date().toISOString() })
+        .eq("id", subId);
+      queryClient.invalidateQueries({ queryKey: ["admin-capstone-subs"] });
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const generateCertNumber = () => {
+    const year = new Date().getFullYear();
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    const rand = (array[0] % 900000) + 100000;
+    return `ADU-${year}-${rand}`;
+  };
+
+  const generateVerificationCode = () => crypto.randomUUID();
+
+  const handleIssueCertificate = async (appUserId: string, schoolSlug: string) => {
+    setProcessingId(`cert-${appUserId}`);
+    try {
+      await supabase.from("certificates").insert({
+        user_id: appUserId,
+        school_slug: schoolSlug,
+        program_name: SCHOOL_PROGRAM_LABELS[schoolSlug] || `${SCHOOL_LABELS[schoolSlug] || schoolSlug} Program`,
+        certificate_number: generateCertNumber(),
+        verification_code: generateVerificationCode(),
+        issued_by: user!.id,
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-certificates"] });
     } finally {
       setProcessingId(null);
     }
@@ -147,6 +282,14 @@ const AdminDashboard = () => {
     return acc;
   }, {});
 
+  const attendanceCounts = (viltAttendance ?? []).reduce((acc: Record<string, number>, a: any) => {
+    acc[a.session_id] = (acc[a.session_id] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Build a set of user_ids that already have a certificate
+  const certifiedUserIds = new Set((issuedCerts ?? []).map((c: any) => c.user_id));
+
   return (
     <div className="min-h-screen bg-background">
       <nav className="bg-foreground border-b border-border sticky top-0 z-50">
@@ -175,7 +318,7 @@ const AdminDashboard = () => {
             { icon: Clock, label: "Pending Applications", value: pendingApps.length, color: "text-secondary" },
             { icon: Users, label: "Approved Students", value: approvedApps.length, color: "text-primary" },
             { icon: BookOpen, label: "Total Courses", value: courses?.length ?? 0, color: "text-secondary" },
-            { icon: BarChart3, label: "Total Enrollments", value: enrollments?.length ?? 0, color: "text-primary" },
+            { icon: Award, label: "Certificates Issued", value: issuedCerts?.length ?? 0, color: "text-primary" },
           ].map((s) => (
             <div key={s.label} className="bg-card rounded-xl border border-border p-4">
               <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
@@ -186,10 +329,19 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="applications" className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1 mb-6">
             <TabsTrigger value="applications">Applications ({pendingApps.length} pending)</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="vilt">
+              <Video className="w-3 h-3 mr-1" />VILT Sessions
+            </TabsTrigger>
+            <TabsTrigger value="projects">
+              <FolderOpen className="w-3 h-3 mr-1" />Projects
+            </TabsTrigger>
+            <TabsTrigger value="certificates">
+              <Award className="w-3 h-3 mr-1" />Certificates
+            </TabsTrigger>
           </TabsList>
 
           {/* Applications Tab */}
@@ -306,6 +458,329 @@ const AdminDashboard = () => {
                   )}
                 </TableBody>
               </Table>
+            </div>
+          </TabsContent>
+
+          {/* VILT Sessions Tab */}
+          <TabsContent value="vilt">
+            <div className="space-y-6">
+              {/* Create new VILT session */}
+              <div className="bg-card rounded-xl border border-border p-5">
+                <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Plus className="w-4 h-4" /> Schedule New VILT Session
+                </h3>
+                <div className="grid sm:grid-cols-2 gap-3 mb-3">
+                  <Input
+                    placeholder="Session title"
+                    value={newVilt.title}
+                    onChange={(e) => setNewVilt((v) => ({ ...v, title: e.target.value }))}
+                  />
+                  <Input
+                    type="datetime-local"
+                    value={newVilt.scheduled_at}
+                    onChange={(e) => setNewVilt((v) => ({ ...v, scheduled_at: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Meeting link (Teams / Google Meet)"
+                    value={newVilt.meeting_link}
+                    onChange={(e) => setNewVilt((v) => ({ ...v, meeting_link: e.target.value }))}
+                  />
+                  <Input
+                    placeholder="Description (optional)"
+                    value={newVilt.description}
+                    onChange={(e) => setNewVilt((v) => ({ ...v, description: e.target.value }))}
+                  />
+                </div>
+                <Button
+                  onClick={handleCreateVilt}
+                  disabled={addingVilt || !newVilt.title || !newVilt.scheduled_at}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  {addingVilt ? "Scheduling…" : "Schedule Session"}
+                </Button>
+              </div>
+
+              {/* Existing sessions */}
+              <div className="bg-card rounded-xl border border-border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Scheduled</TableHead>
+                      <TableHead>Meeting Link</TableHead>
+                      <TableHead>Required</TableHead>
+                      <TableHead>Attendees</TableHead>
+                      <TableHead>Mark Attendance</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {(viltSessions ?? []).length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          No VILT sessions yet
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      (viltSessions ?? []).map((session: any) => (
+                        <TableRow key={session.id}>
+                          <TableCell className="font-medium">{session.title}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {new Date(session.scheduled_at).toLocaleString()}
+                          </TableCell>
+                          <TableCell>
+                            {session.meeting_link ? (
+                              <a
+                                href={session.meeting_link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary text-xs underline"
+                              >
+                                Join
+                              </a>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={session.is_required ? "default" : "secondary"}>
+                              {session.is_required ? "Required" : "Optional"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{attendanceCounts[session.id] || 0}</TableCell>
+                          <TableCell>
+                            {(() => {
+                              const attendedUserIds = new Set(
+                                (viltAttendance ?? [])
+                                  .filter((a: any) => a.session_id === session.id)
+                                  .map((a: any) => a.user_id)
+                              );
+                              const unattended = approvedApps.filter(
+                                (app: any) => !attendedUserIds.has(app.user_id)
+                              );
+                              if (unattended.length === 0) {
+                                return (
+                                  <span className="text-xs text-muted-foreground">All attended</span>
+                                );
+                              }
+                              return (
+                                <select
+                                  className="text-xs border border-border rounded px-2 py-1 bg-background text-foreground"
+                                  defaultValue=""
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleMarkAttendance(session.id, e.target.value);
+                                      e.target.value = "";
+                                    }
+                                  }}
+                                >
+                                  <option value="">Mark student…</option>
+                                  {unattended.map((app: any) => (
+                                    <option key={app.user_id} value={app.user_id}>
+                                      {app.full_name}
+                                    </option>
+                                  ))}
+                                </select>
+                              );
+                            })()}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Projects & Capstone Tab */}
+          <TabsContent value="projects">
+            <div className="bg-card rounded-xl border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>School</TableHead>
+                    <TableHead>Submitted</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {(capstoneSubs ?? []).length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                        No project submissions yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    (capstoneSubs ?? []).map((sub: any) => (
+                      <TableRow key={sub.id}>
+                        <TableCell className="font-medium">{sub.profiles?.full_name ?? "—"}</TableCell>
+                        <TableCell>
+                          <div>{sub.title}</div>
+                          {sub.github_url && (
+                            <a
+                              href={sub.github_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary text-xs underline"
+                            >
+                              GitHub
+                            </a>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={sub.submission_type === "capstone" ? "default" : "secondary"}>
+                            {sub.submission_type}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {SCHOOL_LABELS[sub.school_slug] || sub.school_slug}
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(sub.submitted_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              sub.status === "approved"
+                                ? "default"
+                                : sub.status === "rejected"
+                                ? "destructive"
+                                : "secondary"
+                            }
+                          >
+                            {sub.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {sub.status === "pending" && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleCapstoneReview(sub.id, "approved")}
+                                disabled={processingId === sub.id}
+                              >
+                                <CheckCircle className="w-3 h-3 mr-1" /> Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleCapstoneReview(sub.id, "rejected")}
+                                disabled={processingId === sub.id}
+                              >
+                                <XCircle className="w-3 h-3 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </TabsContent>
+
+          {/* Certificates Tab */}
+          <TabsContent value="certificates">
+            <div className="space-y-6">
+              <div className="bg-card rounded-xl border border-border p-5">
+                <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+                  <Award className="w-4 h-4 text-secondary" /> Issue Certificate to Approved Student
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Verify the student has completed all online modules, attended required VILT sessions,
+                  and has an approved capstone and project before issuing their certificate.
+                </p>
+                <div className="bg-card rounded-xl border border-border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>School / Program</TableHead>
+                        <TableHead>Certificate Status</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {approvedApps.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                            No approved students yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        approvedApps.map((app: any) => {
+                          const hasCert = certifiedUserIds.has(app.user_id);
+                          return (
+                            <TableRow key={app.id}>
+                              <TableCell className="font-medium">{app.full_name}</TableCell>
+                              <TableCell className="text-xs">
+                                {SCHOOL_LABELS[app.school_slug] || app.school_slug}
+                              </TableCell>
+                              <TableCell>
+                                {hasCert ? (
+                                  <Badge variant="default">
+                                    <GraduationCap className="w-3 h-3 mr-1" /> Issued
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">Not issued</Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {!hasCert && (
+                                  <Button
+                                    size="sm"
+                                    className="bg-primary hover:bg-primary/90"
+                                    disabled={processingId === `cert-${app.user_id}`}
+                                    onClick={() => handleIssueCertificate(app.user_id, app.school_slug)}
+                                  >
+                                    <Award className="w-3 h-3 mr-1" />
+                                    Issue Certificate
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {(issuedCerts ?? []).length > 0 && (
+                <div className="bg-card rounded-xl border border-border overflow-hidden">
+                  <div className="px-4 py-3 border-b border-border">
+                    <h3 className="font-bold text-foreground text-sm">Issued Certificates</h3>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Certificate No.</TableHead>
+                        <TableHead>Program</TableHead>
+                        <TableHead>Issued</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {(issuedCerts ?? []).map((cert: any) => (
+                        <TableRow key={cert.id}>
+                          <TableCell className="font-medium">{cert.profiles?.full_name ?? "—"}</TableCell>
+                          <TableCell className="font-mono text-xs">{cert.certificate_number}</TableCell>
+                          <TableCell className="text-xs">{cert.program_name}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground">
+                            {new Date(cert.issued_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
