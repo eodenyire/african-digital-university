@@ -3,8 +3,14 @@ using AfricanDigitalUniversity.Api.Models;
 
 namespace AfricanDigitalUniversity.Api.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext : DbContext
 {
+    // Used by DI for migrations and normal registration
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    // Protected constructor for derived contexts (e.g. SupabaseDbContext)
+    protected AppDbContext(DbContextOptions options) : base(options) { }
+
     public DbSet<User> Users => Set<User>();
     public DbSet<Profile> Profiles => Set<Profile>();
     public DbSet<Course> Courses => Set<Course>();

@@ -8,9 +8,42 @@ using AfricanDigitalUniversity.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Database ───────────────────────────────────────────────────────────────
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+// ── Primary database (local adu-africa PostgreSQL) ─────────────────────────
+builder.Services.AddSingleton<SupabaseReplicationInterceptor>();
+
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.AddInterceptors(sp.GetRequiredService<SupabaseReplicationInterceptor>());
+});
+
+// ── Secondary database (Supabase cloud PostgreSQL) ─────────────────────────
+// Used by SupabaseReplicationInterceptor to mirror every write made to the
+// primary database.  Registration is skipped when the connection string is
+// absent or still contains the placeholder password so the app starts cleanly
+// in environments where Supabase credentials have not yet been configured.
+var supabaseConn = builder.Configuration.GetConnectionString("SupabaseConnection") ?? "";
+var supabaseEnabled = !string.IsNullOrWhiteSpace(supabaseConn)
+    && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD");
+
+if (supabaseEnabled)
+{
+    builder.Services.AddDbContext<SupabaseDbContext>(options =>
+        options.UseNpgsql(supabaseConn));
+}
+else
+{
+    // Register a null/dummy factory so the interceptor can safely request the
+    // service and handle the absence gracefully.
+    builder.Services.AddDbContext<SupabaseDbContext>(options =>
+        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
+
+if (!supabaseEnabled)
+{
+    var startupLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<Program>();
+    startupLogger.LogWarning("SupabaseConnection not configured – Supabase replication disabled.");
+}
 
 // ── JWT Authentication ─────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");
