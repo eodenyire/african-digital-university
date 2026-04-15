@@ -1,0 +1,6 @@
+@AfricanDigitalUniversity.Api_HostAddress = http://localhost:5147
+
+GET {{AfricanDigitalUniversity.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
