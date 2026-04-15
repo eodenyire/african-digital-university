@@ -1,0 +1,1 @@
+CREATE DATABASE "adu-africa" ENCODING 'UTF8';

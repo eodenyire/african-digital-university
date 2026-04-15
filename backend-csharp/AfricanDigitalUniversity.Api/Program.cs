@@ -79,7 +79,9 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                 "http://localhost:5173",
                 "http://localhost:3000",
-                "http://localhost:8080")
+                "http://localhost:8080",
+                "http://localhost:8081",
+                "http://localhost:8082")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -133,10 +135,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ADU API v1"));
 }
 
-app.UseHttpsRedirection();
 app.UseCors("ReactFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Lightweight health check — used by the frontend to detect if C# backend is available
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", backend = "csharp", timestamp = DateTime.UtcNow }))
+   .AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();

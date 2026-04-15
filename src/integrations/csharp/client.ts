@@ -84,10 +84,14 @@ async function request<T>(
 export async function isCsharpBackendAvailable(): Promise<boolean> {
   if (!BASE_URL) return false;
   try {
-    const res = await fetch(`${BASE_URL}/swagger/v1/swagger.json`, {
-      method: "HEAD",
-      signal: AbortSignal.timeout(3000),
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    // Use GET on the health endpoint — HEAD is not supported by Swagger middleware
+    const res = await fetch(`${BASE_URL}/health`, {
+      method: "GET",
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
     return res.ok;
   } catch {
     return false;
@@ -194,7 +198,7 @@ export const csharpProfiles = {
 
 export const csharpApplications = {
   list(): Promise<StudentApplicationDto[]> {
-    return request<StudentApplicationDto[]>("/student-applications");
+    return request<StudentApplicationDto[]>("/student_applications");
   },
   create(data: {
     fullName: string;
@@ -202,13 +206,13 @@ export const csharpApplications = {
     schoolSlug: string;
     motivation?: string;
   }): Promise<StudentApplicationDto> {
-    return request<StudentApplicationDto>("/student-applications", {
+    return request<StudentApplicationDto>("/student_applications", {
       method: "POST",
       body: JSON.stringify(data),
     });
   },
   updateStatus(id: string, status: "approved" | "rejected"): Promise<StudentApplicationDto> {
-    return request<StudentApplicationDto>(`/student-applications/${id}`, {
+    return request<StudentApplicationDto>(`/student_applications/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ status }),
     });
@@ -219,6 +223,6 @@ export const csharpApplications = {
 
 export const csharpUserRoles = {
   listForUser(userId: string): Promise<UserRoleDto[]> {
-    return request<UserRoleDto[]>(`/user-roles?user_id=${userId}`);
+    return request<UserRoleDto[]>(`/user_roles?user_id=${userId}`);
   },
 };

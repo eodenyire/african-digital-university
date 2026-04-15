@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:lessons": "node scripts/generate-lesson-seeds.js",
+    "seed:lessons:apply": "node scripts/generate-lesson-seeds.js && \"C:\\Program Files\\PostgreSQL\\15\\bin\\psql.exe\" -U postgres -d adu-africa -f supabase/migrations/20260416000003_lesson_content_seed.sql"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

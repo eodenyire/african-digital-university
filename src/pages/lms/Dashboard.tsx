@@ -1,6 +1,8 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useBackend } from "@/lib/backendProvider";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { csharpCourses, csharpEnrollments, csharpProfiles } from "@/integrations/csharp/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { BookOpen, GraduationCap, LogOut, Trophy, Clock, ChevronRight, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import aduLogo from "@/assets/adu-logo.png";
 import { BackendStatus } from "@/components/BackendStatus";
+import { useState } from "react";
 
 const SCHOOL_LABELS: Record<string, string> = {
   "software-engineering": "Software Engineering",
@@ -20,70 +23,103 @@ const SCHOOL_LABELS: Record<string, string> = {
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
+  const { activeBackend } = useBackend();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
 
+  const isCsharp = activeBackend === "csharp";
+
+  // ── Profile ──────────────────────────────────────────────────────────────
   const { data: profile } = useQuery({
-    queryKey: ["profile", user?.id],
+    queryKey: ["profile", user?.id, activeBackend],
     queryFn: async () => {
+      if (isCsharp) {
+        return await csharpProfiles.get(user!.id);
+      }
       const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", user!.id)
-        .single();
+        .from("profiles").select("*").eq("user_id", user!.id).single();
       return data;
     },
     enabled: !!user,
   });
 
+  // ── Enrollments ───────────────────────────────────────────────────────────
   const { data: enrollments } = useQuery({
-    queryKey: ["enrollments", user?.id],
+    queryKey: ["enrollments", user?.id, activeBackend],
     queryFn: async () => {
+      if (isCsharp) {
+        return await csharpEnrollments.list(user!.id);
+      }
       const { data } = await supabase
-        .from("enrollments")
-        .select("*, courses(*)")
-        .eq("user_id", user!.id);
+        .from("enrollments").select("*, courses(*)").eq("user_id", user!.id);
       return data;
     },
     enabled: !!user,
   });
 
+  // ── All published courses ─────────────────────────────────────────────────
   const { data: allCourses } = useQuery({
-    queryKey: ["all-courses"],
+    queryKey: ["all-courses", activeBackend],
     queryFn: async () => {
+      if (isCsharp) {
+        return await csharpCourses.list();
+      }
       const { data } = await supabase
-        .from("courses")
-        .select("*")
-        .eq("is_published", true)
-        .order("year")
-        .order("semester")
-        .order("order_index");
+        .from("courses").select("*").eq("is_published", true)
+        .order("year").order("semester").order("order_index");
       return data;
     },
   });
 
+  // ── Certificate (Supabase only for now) ───────────────────────────────────
   const { data: certificate } = useQuery({
     queryKey: ["certificate", user?.id],
     queryFn: async () => {
+      if (isCsharp) return null; // C# certificate endpoint TBD
       const { data } = await supabase
-        .from("certificates")
-        .select("id")
-        .eq("user_id", user!.id)
-        .maybeSingle();
+        .from("certificates").select("id").eq("user_id", user!.id).maybeSingle();
       return data;
     },
     enabled: !!user,
   });
 
-  const enrolledCourseIds = new Set(enrollments?.map((e: any) => e.course_id) ?? []);
+  // ── Normalise enrollment data for both backends ───────────────────────────
+  // Supabase returns: { id, course_id, courses: { id, course_code, ... } }
+  // C# returns:       { id, courseId, course: { id, courseCode, ... } }
+  const normalisedEnrollments = (enrollments ?? []).map((e: any) => ({
+    id: e.id,
+    courseId: e.courseId ?? e.course_id,
+    course: e.course ?? e.courses,
+  }));
 
-  // Group courses by school
-  const coursesBySchool = (allCourses ?? []).reduce((acc: Record<string, any[]>, course: any) => {
-    if (!acc[course.school_slug]) acc[course.school_slug] = [];
-    acc[course.school_slug].push(course);
+  const enrolledCourseIds = new Set(normalisedEnrollments.map((e) => e.courseId));
+
+  // ── Normalise course data ─────────────────────────────────────────────────
+  // Supabase: snake_case  |  C#: camelCase
+  const normaliseCourse = (c: any) => ({
+    id: c.id,
+    schoolSlug: c.schoolSlug ?? c.school_slug,
+    courseCode: c.courseCode ?? c.course_code,
+    title: c.title,
+    description: c.description,
+    year: c.year,
+    semester: c.semester,
+    credits: c.credits,
+    orderIndex: c.orderIndex ?? c.order_index,
+    isPublished: c.isPublished ?? c.is_published,
+  });
+
+  const normalisedCourses = (allCourses ?? []).map(normaliseCourse);
+
+  // Group by school
+  const coursesBySchool = normalisedCourses.reduce((acc: Record<string, any[]>, course) => {
+    if (!acc[course.schoolSlug]) acc[course.schoolSlug] = [];
+    acc[course.schoolSlug].push(course);
     return acc;
   }, {});
 
-  // Group courses within a school by year+semester
   const groupBySemester = (courses: any[]) => {
     const groups: Record<string, any[]> = {};
     for (const c of courses) {
@@ -94,9 +130,25 @@ const Dashboard = () => {
     return groups;
   };
 
+  // ── Enroll ────────────────────────────────────────────────────────────────
   const handleEnroll = async (courseId: string) => {
-    await supabase.from("enrollments").insert({ user_id: user!.id, course_id: courseId });
-    navigate(0);
+    setEnrollingId(courseId);
+    setEnrollError(null);
+    try {
+      if (isCsharp) {
+        await csharpEnrollments.enroll(user!.id, courseId);
+      } else {
+        const { error } = await supabase
+          .from("enrollments").insert({ user_id: user!.id, course_id: courseId });
+        if (error) throw error;
+      }
+      // Refresh enrollments
+      queryClient.invalidateQueries({ queryKey: ["enrollments", user?.id, activeBackend] });
+    } catch (err: any) {
+      setEnrollError(err.message ?? "Enrollment failed");
+    } finally {
+      setEnrollingId(null);
+    }
   };
 
   const handleSignOut = async () => {
@@ -118,9 +170,10 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
             <BackendStatus />
             <span className="text-primary-foreground/60 text-sm hidden sm:block">
-              {profile?.full_name || user?.email}
+              {(profile as any)?.fullName ?? (profile as any)?.full_name ?? user?.email}
             </span>
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
+            <Button variant="ghost" size="sm" onClick={handleSignOut}
+              className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
@@ -131,7 +184,7 @@ const Dashboard = () => {
         {/* Welcome */}
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold text-foreground">
-            Welcome back, {profile?.full_name || "Student"} 👋
+            Welcome back, {(profile as any)?.fullName ?? (profile as any)?.full_name ?? "Student"} 👋
           </h1>
           <p className="text-muted-foreground mt-1">Your learning journey at African Digital University</p>
         </div>
@@ -139,7 +192,7 @@ const Dashboard = () => {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { icon: BookOpen, label: "Enrolled Courses", value: enrollments?.length ?? 0 },
+            { icon: BookOpen, label: "Enrolled Courses", value: normalisedEnrollments.length },
             { icon: Trophy, label: "Completed", value: 0 },
             { icon: Clock, label: "Hours Studied", value: 0 },
             { icon: GraduationCap, label: "Certificates", value: certificate ? 1 : 0 },
@@ -153,10 +206,8 @@ const Dashboard = () => {
         </div>
 
         {/* Certificate banner */}
-        <Link
-          to="/lms/certificate"
-          className="flex items-center gap-4 bg-card border border-border rounded-xl p-4 mb-8 hover:shadow-card transition-shadow group"
-        >
+        <Link to="/lms/certificate"
+          className="flex items-center gap-4 bg-card border border-border rounded-xl p-4 mb-8 hover:shadow-card transition-shadow group">
           <Award className="w-10 h-10 text-secondary shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="font-bold text-foreground">Certificate of Completion</div>
@@ -169,33 +220,39 @@ const Dashboard = () => {
           <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
         </Link>
 
+        {/* Enroll error */}
+        {enrollError && (
+          <div className="mb-4 text-sm text-accent bg-accent/10 px-4 py-3 rounded-lg">
+            {enrollError}
+          </div>
+        )}
+
         {/* My Enrolled Courses */}
-        {enrollments && enrollments.length > 0 && (
+        {normalisedEnrollments.length > 0 && (
           <div className="mb-10">
             <h2 className="text-xl font-bold text-foreground mb-4">My Courses</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {enrollments.map((enrollment: any) => (
-                <Link
-                  key={enrollment.id}
-                  to={`/lms/course/${enrollment.courses.id}`}
-                  className="bg-card rounded-xl border border-border p-5 hover:shadow-card transition-shadow"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                      {enrollment.courses.course_code}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Year {enrollment.courses.year} · Sem {enrollment.courses.semester}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-2">{enrollment.courses.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                    {enrollment.courses.description}
-                  </p>
-                  <Progress value={0} className="h-2" />
-                  <div className="text-xs text-muted-foreground mt-1">0% complete</div>
-                </Link>
-              ))}
+              {normalisedEnrollments.map((enrollment) => {
+                const c = enrollment.course;
+                if (!c) return null;
+                return (
+                  <Link key={enrollment.id} to={`/lms/course/${c.id}`}
+                    className="bg-card rounded-xl border border-border p-5 hover:shadow-card transition-shadow">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
+                        {c.courseCode ?? c.course_code}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Year {c.year} · Sem {c.semester}
+                      </span>
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-2">{c.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{c.description}</p>
+                    <Progress value={0} className="h-2" />
+                    <div className="text-xs text-muted-foreground mt-1">0% complete</div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         )}
@@ -224,20 +281,19 @@ const Dashboard = () => {
                           {semLabel}
                         </h3>
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {courses.map((course: any) => {
+                          {courses.map((course) => {
                             const isEnrolled = enrolledCourseIds.has(course.id);
+                            const isEnrolling = enrollingId === course.id;
                             return (
                               <div key={course.id} className="bg-card rounded-xl border border-border p-5">
                                 <div className="flex items-center gap-2 mb-2">
                                   <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
-                                    {course.course_code}
+                                    {course.courseCode}
                                   </span>
                                   <span className="text-xs text-muted-foreground">{course.credits} credits</span>
                                 </div>
                                 <h4 className="font-semibold text-foreground mb-2">{course.title}</h4>
-                                <p className="text-xs text-muted-foreground mb-4 line-clamp-2">
-                                  {course.description}
-                                </p>
+                                <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{course.description}</p>
                                 {isEnrolled ? (
                                   <Link to={`/lms/course/${course.id}`}>
                                     <Button size="sm" variant="outline" className="w-full">
@@ -245,12 +301,10 @@ const Dashboard = () => {
                                     </Button>
                                   </Link>
                                 ) : (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleEnroll(course.id)}
-                                    className="w-full bg-primary hover:bg-primary/90"
-                                  >
-                                    Enroll Now
+                                  <Button size="sm" onClick={() => handleEnroll(course.id)}
+                                    disabled={isEnrolling}
+                                    className="w-full bg-primary hover:bg-primary/90">
+                                    {isEnrolling ? "Enrolling..." : "Enroll Now"}
                                   </Button>
                                 )}
                               </div>
