@@ -1,4 +1,4 @@
-import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, Sparkles } from "lucide-react";
+import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, Sparkles, Monitor } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const schools = [
@@ -11,6 +11,7 @@ const schools = [
   { icon: Layers, title: "Full Stack Development", slug: "fullstack-development", desc: "HTML to React, Node.js to PostgreSQL, Linux to AWS — a complete 3-year bootcamp from zero to deployed.", color: "bg-primary" },
   { icon: Server, title: "Backend Development", slug: "backend-development", desc: "APIs, databases, containers, messaging, and distributed systems — master the complete backend roadmap.", color: "bg-accent" },
   { icon: Sparkles, title: "AI Engineering", slug: "ai-engineering", desc: "LLMs, RAG, AI agents, MCP, multimodal AI, and production MLOps — build intelligent systems that work at scale.", color: "bg-secondary" },
+  { icon: Monitor, title: "Frontend Development", slug: "frontend-development", desc: "HTML/CSS/JS → React/Vue/TypeScript → SSR/SSG → PWAs, mobile & desktop — build interfaces a billion Africans will use.", color: "bg-primary" },
 ];
 
 const Programs = () => {
@@ -23,7 +24,7 @@ const Programs = () => {
             World-Class <span className="text-gradient-gold">Programs</span>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-            Nine specialized schools designed to produce builders, not just graduates.
+            Ten specialized schools designed to produce builders, not just graduates.
           </p>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

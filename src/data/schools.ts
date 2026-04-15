@@ -1,4 +1,4 @@
-import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, Sparkles, LucideIcon } from "lucide-react";
+import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, Sparkles, Monitor, LucideIcon } from "lucide-react";
 
 export interface Course {
   code: string;
@@ -790,6 +790,95 @@ export const schoolsData: SchoolData[] = [
               { code: "AI308", title: "AI for African Applications", credits: 3, description: "Applied AI for African-context problems: agricultural yield prediction, credit scoring for the unbanked, disease diagnosis in low-resource settings, multilingual NLP for African languages (Swahili, Amharic, Yoruba, Zulu), geospatial AI, and building AI-powered mobile-first applications for low-bandwidth environments." },
               { code: "AI309", title: "AI System Security & Governance", credits: 2, description: "End-to-end security for AI systems: model extraction attacks, data poisoning, membership inference, differential privacy, federated learning, AI governance frameworks, regulatory landscape in Africa, and building AI products that are explainable and auditable." },
               { code: "AI310", title: "AI Engineering Capstone", credits: 6, description: "Design, build, deploy, and operate a production-grade AI system that solves a real and measurable African problem. Requirements: an LLM-powered backend (RAG or fine-tuned model), at least one AI agent with tool use, multimodal capability, vector search, full MLOps pipeline, AI safety measures, containerised deployment, and an observability dashboard. Presented and defended before an industry panel including African AI researchers and practitioners." },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "frontend-development",
+    icon: Monitor,
+    title: "School of Frontend Development",
+    shortTitle: "Frontend Development",
+    color: "hsl(200, 70%, 45%)",
+    colorClass: "bg-[hsl(200,70%,45%)]",
+    tagline: "Build the interfaces that a billion Africans will use every day",
+    description: "A comprehensive three-year bootcamp following the roadmap.sh Frontend Developer roadmap. Students progress from how the internet works and web fundamentals through HTML, CSS, and JavaScript, into version control, modern frameworks (React, Vue, Angular, Svelte), TypeScript, module bundlers, linters, testing, web security, SSR/SSG, performance optimisation, GraphQL, Web Components, accessibility, PWAs, desktop apps, and mobile apps with React Native and Flutter. AI-assisted coding tools and agents are woven throughout so graduates are ready to work in modern AI-augmented engineering teams.",
+    highlights: [
+      "Internet, HTTP, DNS, and browser internals before writing a single line of UI code",
+      "Full HTML/CSS/JavaScript foundation then React, Vue.js, Angular, Svelte, and Solid JS",
+      "TypeScript, module bundlers (Vite, SWC, esbuild), linters (ESLint, Biome, Prettier), and testing (Vitest, Playwright, Cypress)",
+      "SSR, SSG, PWAs, performance, accessibility, GraphQL, Web Components, desktop (Electron/Tauri) & mobile (React Native/Flutter)",
+    ],
+    careerPaths: ["Frontend Engineer", "React Developer", "Vue Developer", "UI Engineer", "Web Performance Engineer", "Accessibility Engineer", "Mobile Developer (React Native)", "Desktop App Developer"],
+    tools: ["HTML5", "CSS3", "JavaScript (ES2024)", "TypeScript", "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "Solid JS", "Tailwind CSS", "Vite", "SWC", "esbuild", "ESLint", "Biome", "Prettier", "Vitest", "Playwright", "Cypress", "Jest", "GraphQL", "Apollo", "Electron", "Tauri", "React Native", "Flutter", "Git", "GitHub", "Vercel", "Netlify", "Cloudflare Pages"],
+    curriculum: [
+      {
+        year: 1, label: "Web Foundations",
+        semesters: [
+          {
+            name: "Semester 1 — Internet, HTML, CSS & JavaScript", courses: [
+              { code: "FE101", title: "How the Internet Works", credits: 3, description: "The complete network layer every frontend developer must understand: how the internet works, HTTP/HTTPS and the request-response cycle, DNS and domain names, what is hosting, how browsers parse and render pages, and an introduction to web security fundamentals (CORS, CSP, OWASP). Applied to understanding African internet infrastructure." },
+              { code: "FE102", title: "HTML — Structure & Semantics", credits: 3, description: "HTML from first principles: semantic elements (header, nav, main, article, section, aside, footer), forms and input types, tables, media (img, video, audio, picture), accessibility attributes (ARIA roles, alt text, lang), meta tags, SEO fundamentals, and the Document Object Model (DOM). Build at least five fully accessible HTML-only pages." },
+              { code: "FE103", title: "CSS — Styling, Layout & Responsive Design", credits: 4, description: "The complete CSS toolkit: the cascade, specificity, inheritance, box model, Flexbox, CSS Grid, responsive design with media queries, custom properties (CSS variables), animations and transitions, pseudo-classes and pseudo-elements, and CSS nesting. Introduction to Tailwind CSS for utility-first styling. Students build a fully responsive multi-page site." },
+              { code: "FE104", title: "JavaScript — Fundamentals", credits: 4, description: "JavaScript from the ground up: variables (let/const/var), data types, operators, control flow, functions (declarations, expressions, arrow), arrays, objects, destructuring, spread/rest, template literals, error handling (try/catch), and the event loop. DOM manipulation: querySelector, addEventListener, creating and removing elements, form validation, and local storage." },
+              { code: "FE105", title: "Version Control with Git & GitHub", credits: 3, description: "Git for frontend developers: initialising repos, staging, committing, branching, merging, rebasing, resolving conflicts, .gitignore, and writing clear commit messages. GitHub: forks, pull requests, code reviews, GitHub Actions basics, and deploying a static site to GitHub Pages. GitLab as an alternative. Collaborative workflow on a team project." },
+            ],
+          },
+          {
+            name: "Semester 2 — JavaScript Depth, Package Managers & CSS Frameworks", courses: [
+              { code: "FE106", title: "JavaScript — Advanced & Modern ES2024", credits: 4, description: "Advanced JavaScript: closures, prototypes, the prototype chain, classes, modules (import/export), async programming (callbacks → Promises → async/await), fetch API, the Event Loop in depth, iterators and generators, Proxy and Reflect, WeakMap/WeakSet, optional chaining, nullish coalescing, and logical assignment operators. Introduction to TypeScript basic types." },
+              { code: "FE107", title: "Package Managers & the Node.js Ecosystem", credits: 3, description: "The JavaScript packaging ecosystem: npm, yarn, pnpm, and Bun — their differences, trade-offs, and workflows. package.json anatomy, semver, lock files, monorepo management with workspaces, publishing packages, running scripts, and npx. Using Node.js as a development tool (not a server) for running build scripts and formatters." },
+              { code: "FE108", title: "Tailwind CSS & CSS Frameworks In-depth", credits: 3, description: "CSS frameworks for modern frontend: Tailwind CSS in depth (configuration, custom themes, component extraction with @apply, JIT mode, dark mode, responsive variants), comparison with Bootstrap and DaisyUI. Building a complete design system in Tailwind. Introduction to CSS Modules and styled-components as alternative approaches." },
+              { code: "FE109", title: "AI-Assisted Coding for Frontend", credits: 3, description: "The modern AI-augmented frontend workflow: Claude Code, Cursor, GitHub Copilot, and Antigravity. How LLMs work at a conceptual level, AI vs traditional coding trade-offs, practical applications (code generation, code review, refactoring, documentation generation, test generation). Prompt engineering basics for coding tasks. Vibe coding workflows — when to trust AI and when to verify." },
+              { code: "FE110", title: "Checkpoint Project: Responsive Web Application", credits: 3, description: "Build a complete responsive web application using vanilla HTML, CSS (Tailwind), and JavaScript. Requirements: semantic HTML, full mobile responsiveness, accessible (WCAG 2.1 AA), form validation, local storage persistence, dark mode toggle, and deployment to Vercel or Netlify. Reviewed by peers and instructors." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 2, label: "Modern Frameworks, TypeScript & Advanced Patterns",
+        semesters: [
+          {
+            name: "Semester 3 — React & the Component Model", courses: [
+              { code: "FE201", title: "React — Core Concepts", credits: 4, description: "React from first principles: JSX, function components, props, state with useState, effects with useEffect, conditional rendering, list rendering with keys, event handling, controlled vs uncontrolled forms, and lifting state up. Component composition, children, and render props. React Developer Tools. Introduction to the React ecosystem (Create React App vs Vite)." },
+              { code: "FE202", title: "React — Hooks, Context & State Management", credits: 4, description: "The full React Hooks API: useCallback, useMemo, useRef, useReducer, useContext, useId, useTransition, useDeferredValue, and custom hooks. Context API for global state. External state management: Zustand, Jotai, and Redux Toolkit. Data fetching patterns: TanStack Query (React Query) for server state management." },
+              { code: "FE203", title: "Next.js — Full-Stack React", credits: 4, description: "Next.js App Router in depth: file-based routing, layouts, loading/error boundaries, server components vs client components, server actions, metadata API, image optimisation, font optimisation, internationalization, and middleware. API routes. Deployment to Vercel. Introduction to React Router and TanStack Start as alternatives." },
+              { code: "FE204", title: "TypeScript for Frontend Engineers", credits: 3, description: "TypeScript from the ground up: primitive types, arrays, tuples, enums, interfaces, type aliases, union and intersection types, generics, utility types (Partial, Required, Pick, Omit, Record), type narrowing, discriminated unions, mapped types, template literal types, and declaration files. TypeScript in React: typing props, events, hooks, and context." },
+              { code: "FE205", title: "Vue.js & Nuxt.js", credits: 3, description: "Vue.js 3 Composition API: reactivity (ref, reactive, computed, watch, watchEffect), components, props, emits, slots, provide/inject, Pinia for state management, Vue Router, and the Vue ecosystem. Nuxt.js for SSR and SSG with Vue. Comparison with React to understand framework trade-offs." },
+            ],
+          },
+          {
+            name: "Semester 4 — Module Bundlers, Testing, Web Security & Auth", courses: [
+              { code: "FE206", title: "Module Bundlers & Build Tools", credits: 3, description: "The modern JavaScript build pipeline: Vite (config, plugins, HMR, build optimisation), SWC (Rust-based transpiler), esbuild (Go-based bundler), Rollup, Rolldown, and Parcel. Concepts: code splitting, tree shaking, lazy loading, chunk optimisation, source maps, and environment variables. Configuring build tools for production React and Vue apps." },
+              { code: "FE207", title: "Linters, Formatters & Code Quality", credits: 2, description: "Automated code quality for frontend: ESLint (rules, plugins, shareable configs, custom rules), Biome (the Rust-based all-in-one linter + formatter), and Prettier. Editor integration (VS Code), pre-commit hooks with Husky and lint-staged, enforcing conventions in CI/CD pipelines, and TypeScript-aware linting with typescript-eslint." },
+              { code: "FE208", title: "Frontend Testing", credits: 4, description: "The complete frontend testing pyramid: unit tests with Vitest (fast, Vite-native), component testing with React Testing Library, integration testing, end-to-end testing with Playwright (the modern standard) and Cypress, and snapshot testing with Jest. Test-driven development (TDD) for frontend, code coverage, mocking API calls with MSW (Mock Service Worker), and visual regression testing." },
+              { code: "FE209", title: "Web Security & Authentication", credits: 3, description: "Security every frontend engineer must know: CORS configuration, HTTPS and TLS certificates, Content Security Policy (CSP), OWASP Top 10 risks for frontend (XSS, CSRF, clickjacking, insecure direct object references), input sanitisation, and secure cookie handling. Authentication strategies: session-based auth, JWT, OAuth 2.0, OpenID Connect, and social login integration. Auth libraries: Auth.js (NextAuth), Clerk, and Supabase Auth." },
+              { code: "FE210", title: "Angular & Svelte", credits: 3, description: "Angular fundamentals: modules, components, templates, directives, pipes, services, dependency injection, routing, RxJS observables, and Angular CLI. Svelte and SvelteKit: reactive declarations, stores, server-side rendering with SvelteKit, and why Svelte's compiler approach differs from React and Vue. Solid JS for completeness. Framework selection criteria for African projects." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 3, label: "Performance, Advanced APIs, PWAs, Desktop & Mobile",
+        semesters: [
+          {
+            name: "Semester 5 — SSR/SSG, Performance, Accessibility & GraphQL", courses: [
+              { code: "FE301", title: "Server-Side Rendering (SSR) & Static Site Generation (SSG)", credits: 3, description: "Rendering strategies in depth: CSR vs SSR vs SSG vs ISR and when to use each. SSR with Next.js, TanStack Start, and Astro. SSG with Astro, Next.js, VuePress, Eleventy (11ty), and Nuxt.js. Hydration, partial hydration, and islands architecture. Deploy SSG sites to Cloudflare Pages, Netlify, and Vercel. SEO implications of each strategy." },
+              { code: "FE302", title: "Performance Engineering", credits: 4, description: "Web performance from first principles: Core Web Vitals (LCP, FID/INP, CLS), Lighthouse auditing, Chrome DevTools Performance panel, Service Workers for offline-first and caching strategies (Cache-Control headers, cache busting), streaming responses, code splitting, lazy loading images and components, font optimisation, resource hints (preload, prefetch, preconnect), and performance budgets. Optimise a real application from poor to excellent Lighthouse scores." },
+              { code: "FE303", title: "Accessibility (a11y)", credits: 3, description: "Building the web for everyone: WCAG 2.1 AA compliance, the four principles (Perceivable, Operable, Understandable, Robust), semantic HTML for accessibility, ARIA roles and attributes (when to use and when not to), keyboard navigation, focus management, screen reader testing (NVDA, VoiceOver), colour contrast, accessible forms and error messages, and automated a11y testing with axe-core and Playwright. Design for low-literacy and low-bandwidth African users." },
+              { code: "FE304", title: "GraphQL for Frontend Engineers", credits: 3, description: "GraphQL as a frontend engineer: queries, mutations, subscriptions, fragments, variables, and directives. Apollo Client for React (cache management, optimistic updates, pagination, error handling). Relay Modern for large-scale data requirements. Comparing REST vs GraphQL trade-offs. Code generation with GraphQL Code Generator. Using GraphQL with Next.js and Supabase." },
+              { code: "FE305", title: "Web Components, Design Systems & PWAs", credits: 3, description: "Web Components: HTML Templates, Custom Elements, and Shadow DOM — building framework-agnostic UI components. Progressive Web Apps (PWAs): the Web App Manifest, service workers for offline support, push notifications, installation (Add to Home Screen), and background sync. Building and publishing a design system as a Storybook + npm package. Accessibility integration in design systems." },
+            ],
+          },
+          {
+            name: "Semester 6 — Desktop, Mobile, AI Integration & Capstone", courses: [
+              { code: "FE306", title: "Desktop Applications (Electron & Tauri)", credits: 3, description: "Building cross-platform desktop applications: Electron (the web-tech-first approach — main process, renderer process, IPC, native menus, system tray, auto-updates, packaging), Tauri (the lightweight Rust-based alternative — commands, events, security model, smaller bundle size), and Flutter for desktop. Packaging and distributing desktop apps for Windows, macOS, and Linux. Distribution on the web vs native." },
+              { code: "FE307", title: "Mobile Development (React Native & Flutter)", credits: 4, description: "Cross-platform mobile from the frontend perspective: React Native (components, StyleSheet, navigation with React Navigation, Expo workflow, accessing native APIs, push notifications, performance, and deploying to Google Play and App Store). Flutter (Dart basics, widgets, state management with Riverpod/Bloc, animations, and deployment). Ionic as a web-first alternative. Building for low-end Android devices common across Africa." },
+              { code: "FE308", title: "Deployment, CI/CD & Observability", credits: 2, description: "Production frontend deployment: GitHub Actions CI/CD pipelines for lint → test → build → deploy, deploying to Vercel, Netlify, Cloudflare Pages, Railway, and Render. Environment variables and secrets management, preview deployments, rollback strategies, feature flags, and frontend observability with Sentry (error tracking), Posthog (analytics), and real-user monitoring (RUM)." },
+              { code: "FE309", title: "AI Integration for Frontend Engineers", credits: 3, description: "Implementing AI features in frontend applications: using the OpenAI API, Anthropic Claude API, and Google Gemini API from a React or Next.js app. Streaming AI responses to the UI with Server-Sent Events. Building an AI chat interface. Integrating AI agents and MCP into web apps. Using the Vercel AI SDK. NanoBanana API (local AI). Prompt engineering from a product perspective. Responsible AI in consumer-facing African applications." },
+              { code: "FE310", title: "Frontend Engineering Capstone", credits: 6, description: "Design, build, deploy, and operate a production-quality frontend application that solves a real African problem. Requirements: React or Vue with TypeScript, Next.js or Nuxt.js with SSR/SSG, Tailwind CSS with an accessible design system, full test suite (unit + E2E with Playwright), WCAG 2.1 AA accessibility compliance, Lighthouse Performance score ≥ 90, AI feature integration (at least one), PWA capability, CI/CD pipeline, deployed to a public domain, and real users. Defended before a panel of industry engineers and UX designers." },
             ],
           },
         ],
