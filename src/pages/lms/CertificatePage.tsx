@@ -180,7 +180,7 @@ const CertificatePage = () => {
   const requiredVilt = (viltSessions ?? []).length;
   const attendedViltIds = new Set((viltAttendance ?? []).map((a: any) => a.session_id));
   const attendedVilt = (viltSessions ?? []).filter((s: any) => attendedViltIds.has(s.id)).length;
-  const viltComplete = requiredVilt > 0 && attendedVilt === requiredVilt;
+  const viltComplete = requiredVilt === 0 || attendedVilt === requiredVilt;
 
   const approvedCapstone = (capstoneSubs ?? []).some((s: any) => s.submission_type === "capstone" && s.status === "approved");
   const approvedProjects = (capstoneSubs ?? []).filter((s: any) => s.submission_type === "project" && s.status === "approved").length;
@@ -272,9 +272,11 @@ const CertificatePage = () => {
                 done={projectsComplete}
                 label="Projects & Capstone Submission"
                 detail={
-                  approvedCapstone
+                  approvedCapstone && approvedProjects >= 1
                     ? `Capstone approved · ${approvedProjects} project(s) approved`
-                    : `Capstone: ${approvedCapstone ? "✓" : "pending"} · Approved projects: ${approvedProjects}`
+                    : `Requires: 1 approved capstone + at least 1 approved project · ` +
+                      `Capstone: ${approvedCapstone ? "✓ approved" : "pending review"} · ` +
+                      `Projects approved: ${approvedProjects}`
                 }
               />
             </div>

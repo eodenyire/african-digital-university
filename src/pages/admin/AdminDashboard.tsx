@@ -220,15 +220,13 @@ const AdminDashboard = () => {
 
   const generateCertNumber = () => {
     const year = new Date().getFullYear();
-    const rand = Math.floor(100000 + Math.random() * 900000);
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    const rand = (array[0] % 900000) + 100000;
     return `ADU-${year}-${rand}`;
   };
 
-  const generateVerificationCode = () =>
-    "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
-      const r = (Math.random() * 16) | 0;
-      return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
-    });
+  const generateVerificationCode = () => crypto.randomUUID();
 
   const handleIssueCertificate = async (appUserId: string, schoolSlug: string) => {
     setProcessingId(`cert-${appUserId}`);
@@ -550,23 +548,40 @@ const AdminDashboard = () => {
                           </TableCell>
                           <TableCell>{attendanceCounts[session.id] || 0}</TableCell>
                           <TableCell>
-                            <select
-                              className="text-xs border border-border rounded px-2 py-1 bg-background text-foreground"
-                              defaultValue=""
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  handleMarkAttendance(session.id, e.target.value);
-                                  e.target.value = "";
-                                }
-                              }}
-                            >
-                              <option value="">Mark student…</option>
-                              {approvedApps.map((app: any) => (
-                                <option key={app.user_id} value={app.user_id}>
-                                  {app.full_name}
-                                </option>
-                              ))}
-                            </select>
+                            {(() => {
+                              const attendedUserIds = new Set(
+                                (viltAttendance ?? [])
+                                  .filter((a: any) => a.session_id === session.id)
+                                  .map((a: any) => a.user_id)
+                              );
+                              const unattended = approvedApps.filter(
+                                (app: any) => !attendedUserIds.has(app.user_id)
+                              );
+                              if (unattended.length === 0) {
+                                return (
+                                  <span className="text-xs text-muted-foreground">All attended</span>
+                                );
+                              }
+                              return (
+                                <select
+                                  className="text-xs border border-border rounded px-2 py-1 bg-background text-foreground"
+                                  defaultValue=""
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      handleMarkAttendance(session.id, e.target.value);
+                                      e.target.value = "";
+                                    }
+                                  }}
+                                >
+                                  <option value="">Mark student…</option>
+                                  {unattended.map((app: any) => (
+                                    <option key={app.user_id} value={app.user_id}>
+                                      {app.full_name}
+                                    </option>
+                                  ))}
+                                </select>
+                              );
+                            })()}
                           </TableCell>
                         </TableRow>
                       ))

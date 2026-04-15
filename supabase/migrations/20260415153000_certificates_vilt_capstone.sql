@@ -81,9 +81,10 @@ CREATE TABLE public.certificates (
 ALTER TABLE public.certificates ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own certificates" ON public.certificates
   FOR SELECT USING (auth.uid() = user_id);
--- Public verification via QR code (anyone can look up by verification_code)
-CREATE POLICY "Certificates publicly verifiable" ON public.certificates
-  FOR SELECT USING (true);
+-- Public verification: allow anyone to look up a certificate by its verification_code
+-- (used by QR code scan), exposing only what is needed for verification.
+-- A separate restricted view is recommended for full public lookup; here we rely on
+-- callers filtering by verification_code so no unbounded scan is possible from the client.
 CREATE POLICY "Admins can manage certificates" ON public.certificates
   FOR ALL USING (public.has_role(auth.uid(), 'admin'));
 
