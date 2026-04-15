@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import aduLogo from "@/assets/adu-logo.png";
 import { useState } from "react";
+import { BackendStatus } from "@/components/BackendStatus";
 
 const SCHOOL_LABELS: Record<string, string> = {
   "software-engineering": "Software Engineering",
@@ -155,6 +156,7 @@ const AdminDashboard = () => {
             <span className="font-bold text-primary-foreground">ADU Admin</span>
           </Link>
           <div className="flex items-center gap-3">
+            <BackendStatus />
             <Link to="/lms/dashboard"><Button variant="ghost" size="sm" className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">Student View</Button></Link>
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10">
               <LogOut className="w-4 h-4" />

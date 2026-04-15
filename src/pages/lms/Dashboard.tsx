@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import aduLogo from "@/assets/adu-logo.png";
+import { BackendStatus } from "@/components/BackendStatus";
 
 const SCHOOL_LABELS: Record<string, string> = {
   "software-engineering": "Software Engineering",
@@ -102,6 +103,7 @@ const Dashboard = () => {
             <span className="font-bold text-primary-foreground">ADU Learning Portal</span>
           </Link>
           <div className="flex items-center gap-4">
+            <BackendStatus />
             <span className="text-primary-foreground/60 text-sm hidden sm:block">
               {profile?.full_name || user?.email}
             </span>
