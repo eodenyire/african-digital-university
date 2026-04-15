@@ -14,6 +14,155 @@ export type Database = {
   }
   public: {
     Tables: {
+      capstone_submissions: {
+        Row: {
+          description: string | null
+          feedback: string | null
+          file_url: string | null
+          github_url: string | null
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          school_slug: string
+          status: string
+          submission_type: string
+          submitted_at: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          description?: string | null
+          feedback?: string | null
+          file_url?: string | null
+          github_url?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school_slug: string
+          status?: string
+          submission_type?: string
+          submitted_at?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          description?: string | null
+          feedback?: string | null
+          file_url?: string | null
+          github_url?: string | null
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school_slug?: string
+          status?: string
+          submission_type?: string
+          submitted_at?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      certificates: {
+        Row: {
+          certificate_number: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          program_name: string
+          school_slug: string
+          user_id: string
+          verification_code: string
+        }
+        Insert: {
+          certificate_number: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          program_name: string
+          school_slug: string
+          user_id: string
+          verification_code: string
+        }
+        Update: {
+          certificate_number?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          program_name?: string
+          school_slug?: string
+          user_id?: string
+          verification_code?: string
+        }
+        Relationships: []
+      }
+      vilt_attendance: {
+        Row: {
+          attended_at: string
+          id: string
+          marked_by: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          attended_at?: string
+          id?: string
+          marked_by?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          attended_at?: string
+          id?: string
+          marked_by?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vilt_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "vilt_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vilt_sessions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_completed: boolean
+          is_required: boolean
+          meeting_link: string | null
+          scheduled_at: string
+          school_slug: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          is_required?: boolean
+          meeting_link?: string | null
+          scheduled_at: string
+          school_slug?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_completed?: boolean
+          is_required?: boolean
+          meeting_link?: string | null
+          scheduled_at?: string
+          school_slug?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
       assignment_submissions: {
         Row: {
           assignment_id: string

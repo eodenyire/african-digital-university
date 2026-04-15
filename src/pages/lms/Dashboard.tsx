@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, GraduationCap, LogOut, Trophy, Clock, ChevronRight } from "lucide-react";
+import { BookOpen, GraduationCap, LogOut, Trophy, Clock, ChevronRight, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,6 +59,19 @@ const Dashboard = () => {
         .order("order_index");
       return data;
     },
+  });
+
+  const { data: certificate } = useQuery({
+    queryKey: ["certificate", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("certificates")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user,
   });
 
   const enrolledCourseIds = new Set(enrollments?.map((e: any) => e.course_id) ?? []);
@@ -129,7 +142,7 @@ const Dashboard = () => {
             { icon: BookOpen, label: "Enrolled Courses", value: enrollments?.length ?? 0 },
             { icon: Trophy, label: "Completed", value: 0 },
             { icon: Clock, label: "Hours Studied", value: 0 },
-            { icon: GraduationCap, label: "Certificates", value: 0 },
+            { icon: GraduationCap, label: "Certificates", value: certificate ? 1 : 0 },
           ].map((s) => (
             <div key={s.label} className="bg-card rounded-xl border border-border p-4">
               <s.icon className="w-5 h-5 text-secondary mb-2" />
@@ -138,6 +151,23 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
+
+        {/* Certificate banner */}
+        <Link
+          to="/lms/certificate"
+          className="flex items-center gap-4 bg-card border border-border rounded-xl p-4 mb-8 hover:shadow-card transition-shadow group"
+        >
+          <Award className="w-10 h-10 text-secondary shrink-0" />
+          <div className="flex-1 min-w-0">
+            <div className="font-bold text-foreground">Certificate of Completion</div>
+            <div className="text-sm text-muted-foreground">
+              {certificate
+                ? "View and download your certificate"
+                : "Check your eligibility and track your progress toward your certificate"}
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </Link>
 
         {/* My Enrolled Courses */}
         {enrollments && enrollments.length > 0 && (

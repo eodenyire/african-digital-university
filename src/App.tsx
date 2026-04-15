@@ -11,6 +11,7 @@ import AuthPage from "./pages/AuthPage.tsx";
 import ApplyPage from "./pages/ApplyPage.tsx";
 import Dashboard from "./pages/lms/Dashboard.tsx";
 import CoursePage from "./pages/lms/CoursePage.tsx";
+import CertificatePage from "./pages/lms/CertificatePage.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { ReactNode } from "react";
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/apply" element={<ProtectedRoute><ApplyPage /></ProtectedRoute>} />
               <Route path="/lms/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/lms/course/:courseId" element={<ProtectedRoute><CoursePage /></ProtectedRoute>} />
+              <Route path="/lms/certificate" element={<ProtectedRoute><CertificatePage /></ProtectedRoute>} />
               <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
