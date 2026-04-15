@@ -1,4 +1,4 @@
-import { Code, Brain, Landmark, Globe, Shield, Cpu, LucideIcon } from "lucide-react";
+import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, LucideIcon } from "lucide-react";
 
 export interface Course {
   code: string;
@@ -523,6 +523,95 @@ export const schoolsData: SchoolData[] = [
               { code: "CI305", title: "Infrastructure Capstone Project", credits: 6, description: "Design and build a cloud infrastructure service for AfriCloud." },
               { code: "CI306", title: "Digital Sovereignty & Policy", credits: 3, description: "Data residency, sovereignty, and African cloud policy." },
               { code: "CI307", title: "Cost Optimization & FinOps", credits: 2, description: "Cloud economics, capacity planning, and financial operations." },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "fullstack-development",
+    icon: Layers,
+    title: "School of Full Stack Development",
+    shortTitle: "Full Stack Development",
+    color: "hsl(220, 70%, 45%)",
+    colorClass: "bg-[hsl(220,70%,45%)]",
+    tagline: "Build complete products from browser to server to cloud",
+    description: "A comprehensive three-year bootcamp that takes absolute beginners to production-ready full-stack engineers. Following the industry-proven roadmap from HTML and CSS through React and Node.js to DevOps on AWS, students learn to build, deploy, and operate complete web applications — exactly how modern tech companies do it.",
+    highlights: [
+      "Learn by building checkpoints: static sites → interactive apps → CRUD apps → complete full-stack platforms",
+      "Master the complete JavaScript ecosystem: browser, server, and tooling",
+      "Gain real DevOps skills: Linux, AWS, Docker, CI/CD, Terraform, and Ansible",
+      "Graduate with a portfolio of deployed, production-grade applications",
+    ],
+    careerPaths: ["Full Stack Developer", "Frontend Engineer", "Backend Engineer", "Node.js Developer", "React Developer", "DevOps Engineer", "Cloud Engineer", "Software Engineer"],
+    tools: ["HTML", "CSS", "JavaScript", "TypeScript", "React", "Tailwind CSS", "Node.js", "Express.js", "PostgreSQL", "Redis", "Git", "GitHub", "npm", "Docker", "AWS", "Terraform", "Ansible", "GitHub Actions", "Nginx"],
+    curriculum: [
+      {
+        year: 1, label: "Web Fundamentals & Frontend Engineering",
+        semesters: [
+          {
+            name: "Semester 1 — Web Foundations", courses: [
+              { code: "FS101", title: "HTML & the Semantic Web", credits: 4, description: "Document structure, semantic elements, forms, tables, accessibility, and the role of HTML in the browser rendering pipeline. Checkpoint: build three well-structured static webpages." },
+              { code: "FS102", title: "CSS & Responsive Design", credits: 4, description: "Selectors, the box model, Flexbox, CSS Grid, media queries, animations, and CSS variables. Learn to craft pixel-perfect, mobile-first layouts." },
+              { code: "FS103", title: "JavaScript Fundamentals", credits: 4, description: "Variables, data types, functions, control flow, arrays, objects, the DOM, and browser events. Write your first interactive scripts. Checkpoint: add interactivity to your static pages." },
+              { code: "FS104", title: "Git, GitHub & Developer Tooling", credits: 3, description: "Version control with Git (branches, commits, merges, rebasing), remote collaboration on GitHub (pull requests, code review, issues), and VS Code productivity. Checkpoint: collaborative work on a shared repository." },
+              { code: "FS105", title: "Computer Fundamentals & Problem Solving", credits: 2, description: "How computers work, binary, the internet, HTTP, and algorithmic thinking — the foundation every web developer needs." },
+            ],
+          },
+          {
+            name: "Semester 2 — Interactive Frontend & React", courses: [
+              { code: "FS106", title: "Advanced JavaScript & ES6+", credits: 4, description: "Closures, prototypes, classes, Promises, async/await, the Fetch API, modules, and error handling. Deepen your understanding of the language that powers the web." },
+              { code: "FS107", title: "npm & the Package Ecosystem", credits: 3, description: "npm CLI, package.json, semantic versioning, bundlers (Vite), linting (ESLint), formatting (Prettier), and managing third-party libraries. Checkpoint: integrate and configure external packages in a project." },
+              { code: "FS108", title: "React Fundamentals", credits: 4, description: "Component-based architecture, JSX, props, state with hooks (useState, useEffect, useContext), React Router, and fetching data from APIs. Build reusable UI components." },
+              { code: "FS109", title: "Tailwind CSS & Modern UI Design", credits: 3, description: "Utility-first CSS with Tailwind, responsive design systems, dark mode, component libraries, and design tokens. Build beautiful, consistent user interfaces rapidly." },
+              { code: "FS110", title: "Checkpoint Project: Frontend Applications", credits: 3, description: "Integrate all frontend skills to build two complete, deployed single-page applications: a portfolio site and a data-driven dashboard consuming a public API." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 2, label: "Backend Engineering & Full-Stack Integration",
+        semesters: [
+          {
+            name: "Semester 3 — Node.js, Databases & APIs", courses: [
+              { code: "FS201", title: "Node.js & Server-Side JavaScript", credits: 4, description: "The Node.js runtime, the event loop, CommonJS and ES modules, the built-in HTTP module, file system operations, streams, and building CLI applications. Checkpoint: build command-line tools." },
+              { code: "FS202", title: "PostgreSQL & Relational Databases", credits: 4, description: "Database design, SQL (SELECT, INSERT, UPDATE, DELETE, JOINs, aggregates), indexing, transactions, and using PostgreSQL from Node.js with an ORM. Checkpoint: build simple CRUD applications backed by a real database." },
+              { code: "FS203", title: "Express.js & RESTful API Design", credits: 4, description: "Routing, middleware, request/response lifecycle, error handling, input validation, CORS, and REST principles. Design and implement a multi-resource JSON API following best practices." },
+              { code: "FS204", title: "TypeScript for Full-Stack Developers", credits: 2, description: "Static typing, interfaces, generics, type narrowing, and how TypeScript improves code quality and developer experience on both client and server." },
+              { code: "FS205", title: "Checkpoint Project: Simple CRUD Apps", credits: 3, description: "Build and deploy three backend services: a task manager API, a blog API, and a contacts API — each with full CRUD operations and a PostgreSQL database." },
+            ],
+          },
+          {
+            name: "Semester 4 — Auth, Caching & Full-Stack Applications", courses: [
+              { code: "FS206", title: "JWT Authentication & Security", credits: 4, description: "Password hashing (bcrypt), JSON Web Tokens, refresh tokens, role-based access control, OAuth 2.0, session management, and the OWASP Top 10. Secure every layer of your application." },
+              { code: "FS207", title: "Redis & Caching Strategies", credits: 3, description: "Redis data structures (strings, hashes, lists, sets, sorted sets), caching patterns (cache-aside, write-through), session storage, rate limiting, and background job queues." },
+              { code: "FS208", title: "RESTful API Patterns & Testing", credits: 3, description: "API versioning, pagination, filtering, sorting, documentation (OpenAPI/Swagger), integration testing with Jest and Supertest, and test-driven development habits." },
+              { code: "FS209", title: "Full-Stack React + Node.js Integration", credits: 4, description: "Connect a React frontend to a Node.js/Express backend: authentication flows, protected routes, state management with React Query, file uploads, and real-time updates with WebSockets." },
+              { code: "FS210", title: "Checkpoint Project: Complete Full-Stack App", credits: 3, description: "Build and deploy a production-quality full-stack application (e.g., a job board, e-commerce store, or social platform) with authentication, a database, a REST API, and a React frontend." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 3, label: "DevOps, Cloud & Production Engineering",
+        semesters: [
+          {
+            name: "Semester 5 — Linux, AWS & Cloud Deployment", courses: [
+              { code: "FS301", title: "Linux Fundamentals for Developers", credits: 4, description: "The Linux filesystem, shell scripting (Bash), process management, permissions, SSH, cron jobs, package management, and server administration. Master the environment where your code runs." },
+              { code: "FS302", title: "AWS Core Services", credits: 4, description: "In-depth coverage of the AWS services every full-stack developer uses: EC2 (compute), VPC (networking & security groups), S3 (object storage & static hosting), Route 53 (DNS), and SES (email). Configure and manage a complete AWS environment." },
+              { code: "FS303", title: "Docker & Containerisation", credits: 3, description: "Writing Dockerfiles, building and tagging images, Docker Compose for multi-container applications, private registries, and container networking — package your applications for consistent deployment anywhere." },
+              { code: "FS304", title: "Web Servers, HTTPS & Deployment Patterns", credits: 3, description: "Nginx as a reverse proxy, SSL/TLS certificate management (Let's Encrypt), load balancing, blue-green and rolling deployments, environment variable management, and production hardening." },
+              { code: "FS305", title: "Checkpoint Project: Deploy a Full-Stack App to AWS", credits: 3, description: "End-to-end deployment of your Year 2 full-stack application to AWS: Dockerised services on EC2, a managed PostgreSQL database, S3 for assets, Route 53 for DNS, HTTPS via Let's Encrypt, and Nginx as a reverse proxy." },
+            ],
+          },
+          {
+            name: "Semester 6 — CI/CD, Automation, Monitoring & Capstone", courses: [
+              { code: "FS306", title: "GitHub Actions & CI/CD Pipelines", credits: 4, description: "Workflows, triggers, runners, automated testing pipelines, Docker image builds, deployments to AWS on every push, environment secrets management, and rollback strategies. Checkpoint: fully automated CI/CD pipeline." },
+              { code: "FS307", title: "Ansible & Configuration Management", credits: 3, description: "Inventory management, playbooks, roles, variables, handlers, Ansible Vault for secrets, and idempotent server configuration — automate everything from OS setup to application deployment." },
+              { code: "FS308", title: "Terraform & Infrastructure as Code", credits: 3, description: "HCL syntax, providers (AWS), resources, state management, modules, workspaces, and provisioning a complete cloud environment from code. Checkpoint: infrastructure as code." },
+              { code: "FS309", title: "Monitoring, Alerting & Observability", credits: 3, description: "Application-level monitoring with Monit, structured logging, uptime monitoring, alerting on failures, and an introduction to Prometheus and Grafana for metrics dashboards." },
+              { code: "FS310", title: "Full-Stack Development Capstone", credits: 6, description: "Design, build, deploy, and operate a production-grade full-stack platform that solves a real African problem. The capstone must include: a React frontend, a Node.js API, PostgreSQL + Redis, full authentication, automated CI/CD via GitHub Actions, infrastructure provisioned with Terraform, and live monitoring. Presented to an industry panel." },
             ],
           },
         ],

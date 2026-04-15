@@ -13,6 +13,7 @@ import { CheckCircle, Clock, XCircle } from "lucide-react";
 const SCHOOLS = [
   { slug: "software-engineering", label: "Software Engineering" },
   { slug: "ai-data-science", label: "AI & Data Science" },
+  { slug: "fullstack-development", label: "Full Stack Development" },
   { slug: "backend-engineering", label: "Backend Engineering" },
   { slug: "frontend-engineering", label: "Frontend Engineering" },
   { slug: "cloud-engineering", label: "Cloud Engineering" },
