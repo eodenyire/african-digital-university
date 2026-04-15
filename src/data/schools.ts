@@ -1,4 +1,4 @@
-import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, LucideIcon } from "lucide-react";
+import { Code, Brain, Landmark, Globe, Shield, Cpu, Layers, Server, Sparkles, LucideIcon } from "lucide-react";
 
 export interface Course {
   code: string;
@@ -701,6 +701,95 @@ export const schoolsData: SchoolData[] = [
               { code: "BD308", title: "Basic Infrastructure Knowledge & DevOps", credits: 3, description: "Core infrastructure concepts every backend engineer needs: servers, networking (VPC, subnets, security groups), object storage (S3), managed databases, IAM, and an introduction to Terraform for infrastructure-as-code. Cross-references the DevOps roadmap." },
               { code: "BD309", title: "Backend Security & Performance Hardening", credits: 2, description: "Profiling and performance optimisation: CPU and memory profiling, query analysis, connection pooling, caching audit, and database migrations with zero downtime. Penetration testing basics and dependency vulnerability management." },
               { code: "BD310", title: "Backend Development Capstone", credits: 6, description: "Design, build, deploy, and operate a production-grade backend platform that solves a real African challenge. Requirements: polyglot persistence (relational + NoSQL + cache), asynchronous processing via Kafka or RabbitMQ, real-time capability via WebSockets, Kubernetes deployment, full observability (metrics + logs + traces), automated CI/CD, and infrastructure as code. Defended before an industry panel." },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    slug: "ai-engineering",
+    icon: Sparkles,
+    title: "School of AI Engineering",
+    shortTitle: "AI Engineering",
+    color: "hsl(280, 65%, 50%)",
+    colorClass: "bg-[hsl(280,65%,50%)]",
+    tagline: "Build the systems that think, reason, and act at scale",
+    description: "A comprehensive three-year bootcamp following the roadmap.sh AI Engineer roadmap. Students move from programming prerequisites and mathematics through Python, working with data, machine learning, and deep learning, into the modern AI stack: large language models, prompt engineering, RAG pipelines, vector databases, AI agents, the Model Context Protocol, multimodal AI, and responsible AI safety. Graduate ready to design and ship production AI systems that solve real African problems.",
+    highlights: [
+      "Mathematics and Python fundamentals before touching any model",
+      "Full ML stack: supervised, unsupervised, reinforcement, and deep learning",
+      "Modern LLM stack: embeddings, vector search, RAG, LangChain, LlamaIndex",
+      "AI Agents, MCP servers, multimodal AI, and production safety practices",
+    ],
+    careerPaths: ["AI Engineer", "ML Engineer", "LLM Engineer", "AI Researcher", "Data Scientist", "Prompt Engineer", "AI Safety Engineer", "AI Product Engineer"],
+    tools: ["Python", "NumPy", "Pandas", "scikit-learn", "PyTorch", "TensorFlow", "Hugging Face", "LangChain", "LlamaIndex", "OpenAI API", "Pinecone", "Weaviate", "PostgreSQL (pgvector)", "Docker", "FastAPI", "Jupyter", "MLflow", "Weights & Biases"],
+    curriculum: [
+      {
+        year: 1, label: "AI Foundations",
+        semesters: [
+          {
+            name: "Semester 1 — Prerequisites: Programming, Mathematics & Python", courses: [
+              { code: "AI101", title: "Programming Fundamentals for AI", credits: 3, description: "Core programming concepts every AI engineer needs: variables, data types, control flow, functions, recursion, data structures (lists, dicts, sets, queues), object-oriented programming, and complexity analysis — implemented in Python." },
+              { code: "AI102", title: "Mathematics for AI — Linear Algebra & Calculus", credits: 4, description: "Linear algebra at the pace of an engineer: vectors, matrices, matrix multiplication, eigenvalues, eigenvectors, SVD, and geometric intuition. Calculus: derivatives, gradients, the chain rule, and partial derivatives — the engine behind backpropagation." },
+              { code: "AI103", title: "Mathematics for AI — Probability & Statistics", credits: 4, description: "Probability theory: events, Bayes' theorem, conditional probability, distributions (normal, Bernoulli, Poisson, softmax), expectations, and variance. Statistics: hypothesis testing, confidence intervals, MLE/MAP estimation, and information theory (entropy, KL divergence)." },
+              { code: "AI104", title: "Python for AI Engineering", credits: 3, description: "Python as the primary language of AI: NumPy for numerical computing, Pandas for tabular data manipulation, Matplotlib and Seaborn for visualisation, Jupyter notebooks for exploration, and virtual environments with pip/conda for reproducible AI projects." },
+              { code: "AI105", title: "Working with Data", credits: 3, description: "The complete data pipeline: data collection strategies, web scraping, API data ingestion, data cleaning and imputation, feature engineering (encoding, scaling, binning), handling class imbalance, train/val/test splits, and building reproducible data pipelines with Python." },
+            ],
+          },
+          {
+            name: "Semester 2 — Classical Machine Learning", courses: [
+              { code: "AI106", title: "Supervised Learning Algorithms", credits: 4, description: "The core supervised learning toolkit: linear and logistic regression, decision trees, random forests, gradient boosting (XGBoost, LightGBM), SVMs, k-Nearest Neighbours, naïve Bayes, and ensemble methods. Evaluation: accuracy, precision, recall, F1, ROC-AUC, and confusion matrices." },
+              { code: "AI107", title: "Unsupervised Learning & Dimensionality Reduction", credits: 3, description: "Clustering algorithms (K-Means, DBSCAN, hierarchical), dimensionality reduction (PCA, t-SNE, UMAP), anomaly detection, and association rule mining. Apply to African agricultural, health, and financial datasets." },
+              { code: "AI108", title: "Model Training, Evaluation & MLOps Basics", credits: 3, description: "The ML project lifecycle: cross-validation, hyperparameter tuning (grid search, Bayesian optimisation), regularisation, bias-variance trade-off, model versioning with MLflow, and packaging models for deployment with FastAPI." },
+              { code: "AI109", title: "Reinforcement Learning Fundamentals", credits: 3, description: "Markov Decision Processes, the Bellman equation, Q-learning, deep Q-networks (DQN), policy gradient methods (REINFORCE, PPO), and multi-armed bandits. Apply RL to optimisation problems relevant to logistics and resource allocation in Africa." },
+              { code: "AI110", title: "Checkpoint Project: ML Pipeline for an African Dataset", credits: 3, description: "Build an end-to-end machine learning pipeline: data ingestion → feature engineering → model training → evaluation → serving via a REST API. Use a real African dataset (crop yield prediction, credit scoring, or disease detection)." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 2, label: "Deep Learning & the Modern LLM Stack",
+        semesters: [
+          {
+            name: "Semester 3 — Neural Networks & Deep Learning", courses: [
+              { code: "AI201", title: "Neural Networks & Backpropagation", credits: 4, description: "How neural networks work from first principles: perceptrons, activation functions (ReLU, sigmoid, tanh, GELU), forward pass, loss functions (cross-entropy, MSE), backpropagation, and stochastic gradient descent variants (Adam, RMSProp, AdaGrad). Implement a network from scratch in NumPy." },
+              { code: "AI202", title: "Convolutional Neural Networks (CNNs)", credits: 3, description: "Convolutional layers, pooling, batch normalisation, dropout, and residual connections. Architectures: LeNet, AlexNet, VGG, ResNet, and EfficientNet. Transfer learning with pre-trained vision models for African-context image classification tasks." },
+              { code: "AI203", title: "Recurrent Networks, Attention & Transformers", credits: 4, description: "Sequential modelling: RNNs, LSTMs, GRUs, and their vanishing-gradient problem. Attention mechanisms, self-attention, multi-head attention, and positional encoding. The Transformer architecture in full — the foundation of every modern LLM." },
+              { code: "AI204", title: "PyTorch & Deep Learning Frameworks", credits: 3, description: "PyTorch in depth: tensors, autograd, nn.Module, DataLoader, custom training loops, learning rate schedulers, mixed-precision training, GPU utilisation, and the Hugging Face ecosystem (transformers, datasets, tokenizers)." },
+              { code: "AI205", title: "Generative Models", credits: 3, description: "Generative AI beyond transformers: Variational Autoencoders (VAEs), Generative Adversarial Networks (GANs), diffusion models (DDPM, Stable Diffusion), and normalising flows. Understand how image generation, style transfer, and data augmentation work under the hood." },
+            ],
+          },
+          {
+            name: "Semester 4 — Large Language Models, RAG & Vector Search", courses: [
+              { code: "AI206", title: "Working with Large Language Models", credits: 4, description: "The modern LLM landscape: GPT-4 / GPT-4o, Claude, Gemini, Llama, Mistral, Falcon, and open-source models. The OpenAI API, Anthropic API, and Hugging Face Inference: text generation, structured output, function calling, streaming, and token management. Cost optimisation strategies." },
+              { code: "AI207", title: "Prompt Engineering", credits: 3, description: "The craft of prompting: zero-shot and few-shot prompting, chain-of-thought, tree-of-thought, self-consistency, ReAct, structured output prompting, prompt chaining, and system prompt design. Evaluate prompt quality systematically with LLM-as-a-judge frameworks." },
+              { code: "AI208", title: "Embeddings & Vector Databases", credits: 3, description: "Text, image, and multimodal embeddings: how they work, dimensionality, and similarity metrics (cosine, dot product, Euclidean). Vector databases in depth: Pinecone, Weaviate, Qdrant, Chroma, and pgvector. Indexing strategies (HNSW, IVF) and approximate nearest-neighbour search." },
+              { code: "AI209", title: "Retrieval-Augmented Generation (RAG)", credits: 4, description: "The complete RAG stack: document ingestion, chunking strategies, embedding generation, retrieval pipelines, context stuffing, and answer synthesis. Frameworks: LangChain, LlamaIndex, Haystack, and RAGFlow. Advanced RAG: hybrid search, re-ranking, query rewriting, and agentic RAG evaluation with RAGAS." },
+              { code: "AI210", title: "Fine-Tuning & Alignment", credits: 3, description: "Fine-tuning LLMs on domain-specific African data: supervised fine-tuning (SFT), parameter-efficient methods (LoRA, QLoRA, adapters), RLHF, and direct preference optimisation (DPO). Use Hugging Face TRL and Axolotl. Deployment on Ollama and vLLM." },
+            ],
+          },
+        ],
+      },
+      {
+        year: 3, label: "AI Agents, Safety, Multimodal & Production Systems",
+        semesters: [
+          {
+            name: "Semester 5 — AI Agents, MCP & Multimodal AI", courses: [
+              { code: "AI301", title: "Building AI Agents", credits: 4, description: "AI agent architectures from first principles: the ReAct loop (reasoning + acting), tool use, memory (in-context, external, episodic), planning, and reflection. Manual implementation, then with frameworks: OpenAI AgentKit & Agent SDK, Claude Agent SDK, Vertex AI Agent Builder, and Google ADK. Multi-agent systems: orchestrators, subagents, critic agents, and swarms." },
+              { code: "AI302", title: "Model Context Protocol (MCP)", credits: 3, description: "MCP in depth: the MCP architecture (Host, Client, Server, Data Layer, Transport Layer), building an MCP Server that exposes tools and resources, building an MCP Client, connecting to local and remote MCP servers, and integrating MCP into AI applications to give agents structured access to data and APIs." },
+              { code: "AI303", title: "Multimodal AI", credits: 4, description: "Vision-language models (VLMs): image understanding and generation (OpenAI Vision API, DALL-E, Stable Diffusion), video understanding, audio processing, text-to-speech (TTS), speech-to-text (STT / Whisper API), Hugging Face multimodal pipelines, LangChain and LlamaIndex for multimodal apps, and implementing multimodal AI products end-to-end." },
+              { code: "AI304", title: "AI Safety and Ethics", credits: 3, description: "Responsible AI from an engineering perspective: prompt injection attacks and defences, jailbreaking, security and privacy concerns, bias and fairness auditing, content moderation APIs, adding end-user IDs in prompts, adversarial testing, robust prompt engineering, output and input constraining, and AI safety best practices for products serving African communities." },
+              { code: "AI305", title: "AI Development Tools & Vibe Coding", credits: 2, description: "The modern AI-assisted engineering workflow: Claude Code, Gemini, Codex, Cursor, Windsurf, and Replit. Agentic coding workflows (vibe coding), AI-assisted code review, test generation, and documentation. Balance productivity gains with engineering rigour and code quality." },
+            ],
+          },
+          {
+            name: "Semester 6 — Production AI, MLOps & Capstone", courses: [
+              { code: "AI306", title: "Serving & Deploying AI Systems", credits: 3, description: "Production LLM serving: vLLM, Ollama, TGI (Text Generation Inference), and Triton Inference Server. API design for AI services with FastAPI and LangServe, containerisation with Docker, orchestration with Kubernetes, scaling GPU workloads, and latency/cost optimisation strategies." },
+              { code: "AI307", title: "MLOps & AI Observability", credits: 3, description: "The full MLOps lifecycle: experiment tracking (MLflow, Weights & Biases), model registries, CI/CD for ML (GitHub Actions), data versioning (DVC), A/B testing models in production, monitoring model drift, structured logging for AI systems, and LLM observability with LangSmith and Phoenix Arize." },
+              { code: "AI308", title: "AI for African Applications", credits: 3, description: "Applied AI for African-context problems: agricultural yield prediction, credit scoring for the unbanked, disease diagnosis in low-resource settings, multilingual NLP for African languages (Swahili, Amharic, Yoruba, Zulu), geospatial AI, and building AI-powered mobile-first applications for low-bandwidth environments." },
+              { code: "AI309", title: "AI System Security & Governance", credits: 2, description: "End-to-end security for AI systems: model extraction attacks, data poisoning, membership inference, differential privacy, federated learning, AI governance frameworks, regulatory landscape in Africa, and building AI products that are explainable and auditable." },
+              { code: "AI310", title: "AI Engineering Capstone", credits: 6, description: "Design, build, deploy, and operate a production-grade AI system that solves a real and measurable African problem. Requirements: an LLM-powered backend (RAG or fine-tuned model), at least one AI agent with tool use, multimodal capability, vector search, full MLOps pipeline, AI safety measures, containerised deployment, and an observability dashboard. Presented and defended before an industry panel including African AI researchers and practitioners." },
             ],
           },
         ],
