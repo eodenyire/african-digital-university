@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using AfricanDigitalUniversity.Api.Data;
+using AfricanDigitalUniversity.Api.Models;
 using AfricanDigitalUniversity.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,12 +77,24 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactFrontend", policy =>
     {
-        policy.WithOrigins(
-                "http://localhost:5173",
-                "http://localhost:3000",
-                "http://localhost:8080",
-                "http://localhost:8081",
-                "http://localhost:8082")
+        var configuredOrigins = builder.Configuration
+            .GetSection("Cors:AllowedOrigins")
+            .Get<string[]>() ?? [];
+
+        var allowedOrigins = new[]
+        {
+            "https://african-digital-university.onrender.com",
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://localhost:8080",
+            "http://localhost:8081",
+            "http://localhost:8082",
+        }
+        .Concat(configuredOrigins)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToArray();
+
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -127,6 +140,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
+await SeedDefaultAdminAsync(app);
 
 // ── Middleware pipeline ────────────────────────────────────────────────────
 if (app.Environment.IsDevelopment())
@@ -146,3 +160,55 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy", backend = "csha
 app.MapControllers();
 
 app.Run();
+
+static async Task SeedDefaultAdminAsync(WebApplication app)
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("StartupSeed");
+
+    var adminEmail = app.Configuration["Seed:AdminEmail"] ?? "admin@adu.africa";
+    var adminPassword = app.Configuration["Seed:AdminPassword"] ?? "Admin2026!";
+    var adminFullName = app.Configuration["Seed:AdminFullName"] ?? "ADU Administrator";
+
+    var adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+    if (adminUser is null)
+    {
+        adminUser = new User
+        {
+            Email = adminEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+            EmailConfirmedAt = DateTime.UtcNow,
+            RawUserMetaData = "{\"full_name\":\"ADU Administrator\"}",
+        };
+        db.Users.Add(adminUser);
+        await db.SaveChangesAsync();
+        logger.LogInformation("Seeded default admin user {Email}.", adminEmail);
+    }
+
+    var profileExists = await db.Profiles.AnyAsync(p => p.UserId == adminUser.Id);
+    if (!profileExists)
+    {
+        db.Profiles.Add(new Profile
+        {
+            UserId = adminUser.Id,
+            FullName = adminFullName,
+        });
+    }
+
+    var roleExists = await db.UserRoles.AnyAsync(r => r.UserId == adminUser.Id && r.Role == AppRole.Admin);
+    if (!roleExists)
+    {
+        db.UserRoles.Add(new UserRole
+        {
+            UserId = adminUser.Id,
+            Role = AppRole.Admin,
+        });
+    }
+
+    if (!profileExists || !roleExists)
+    {
+        await db.SaveChangesAsync();
+        logger.LogInformation("Ensured admin profile/role for {Email}.", adminEmail);
+    }
+}
