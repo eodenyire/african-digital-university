@@ -17,8 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 3) Replicate to Supabase only when Supabase is configured and different from
 //    the primary connection.
 var defaultConn = ResolveDefaultConnection(builder.Configuration);
-var supabaseConn = NormalizePostgresConnectionString(
-    builder.Configuration.GetConnectionString("SupabaseConnection") ?? "");
+var supabaseConn = ResolveSupabaseConnection(builder.Configuration);
 
 var supabaseConfigured = !string.IsNullOrWhiteSpace(supabaseConn)
     && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal);
@@ -40,7 +39,8 @@ if (string.IsNullOrWhiteSpace(primaryConn))
     throw new InvalidOperationException(
         "No valid primary database connection string configured. " +
         "Provide ConnectionStrings__DefaultConnection (or DATABASE_URL/NEON_DATABASE_URL/NEON_URL) " +
-        "or ConnectionStrings__SupabaseConnection in non-development environments.");
+        "or ConnectionStrings__SupabaseConnection (SUPABASE_DB_URL/SUPABASE_DATABASE_URL/SUPABASE_DB_PASSWORD) " +
+        "in non-development environments.");
 
 var supabaseReplicationEnabled = supabaseConfigured
     && !string.Equals(primaryConn, supabaseConn, StringComparison.Ordinal);
@@ -207,6 +207,34 @@ static string ResolveDefaultConnection(IConfiguration configuration)
     }
 
     return NormalizePostgresConnectionString(configured ?? "");
+}
+
+static string ResolveSupabaseConnection(IConfiguration configuration)
+{
+    var configured = configuration.GetConnectionString("SupabaseConnection");
+    if (!string.IsNullOrWhiteSpace(configured)
+        && configured.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal))
+    {
+        var password = configuration["SUPABASE_DB_PASSWORD"];
+        configured = string.IsNullOrWhiteSpace(password)
+            ? string.Empty
+            : configured.Replace("YOUR_SUPABASE_DB_PASSWORD", password, StringComparison.Ordinal);
+    }
+
+    if (string.IsNullOrWhiteSpace(configured))
+    {
+        configured = configuration["SUPABASE_DB_URL"]
+            ?? configuration["SUPABASE_DATABASE_URL"]
+            ?? configuration["SUPABASE_CONNECTION_STRING"];
+    }
+
+    var normalized = NormalizePostgresConnectionString(configured ?? "");
+    if (!string.IsNullOrWhiteSpace(normalized))
+    {
+        configuration["ConnectionStrings:SupabaseConnection"] = normalized;
+    }
+
+    return normalized;
 }
 
 static string NormalizePostgresConnectionString(string input)
