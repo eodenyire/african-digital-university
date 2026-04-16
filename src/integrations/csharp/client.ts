@@ -2,7 +2,7 @@
  * HTTP client for the C# ASP.NET Core backend (african-digital-university API).
  *
  * The base URL is read from the VITE_CSHARP_API_URL environment variable.
- * When the variable is not set the client is effectively disabled.
+ * If not provided, production builds default to the Render backend URL.
  *
  * Authentication is JWT-based: after sign-in the token is stored in
  * localStorage under the key "adu_csharp_token" and attached to every
@@ -21,7 +21,10 @@ import type {
   UserRoleDto,
 } from "./types";
 
-const BASE_URL = (import.meta.env.VITE_CSHARP_API_URL as string | undefined) ?? "";
+const DEFAULT_RENDER_API_URL = "https://african-digital-university-backend.onrender.com";
+const BASE_URL =
+  (import.meta.env.VITE_CSHARP_API_URL as string | undefined) ??
+  (import.meta.env.PROD ? DEFAULT_RENDER_API_URL : "");
 const TOKEN_KEY = "adu_csharp_token";
 
 // ── Token helpers ────────────────────────────────────────────────────────────

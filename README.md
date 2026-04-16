@@ -169,13 +169,15 @@ Create a `.env` file in the project root.
 VITE_SUPABASE_URL=...
 VITE_SUPABASE_PUBLISHABLE_KEY=...
 
-# Optional: enables C# backend probing/failover
+# Optional: overrides C# backend probing/failover URL
 VITE_CSHARP_API_URL=http://localhost:5000
 ```
 
 ### Behavior notes
 
-- If `VITE_CSHARP_API_URL` is unset, frontend runs in Supabase mode.
+- If `VITE_CSHARP_API_URL` is unset:
+  - in development, frontend runs in Supabase mode.
+  - in production, frontend defaults to `https://african-digital-university-backend.onrender.com`.
 - If set, frontend probes C# `/health` and switches automatically when reachable.
 - Probe interval is 30 seconds, so recovery/failover is automatic.
 
