@@ -242,48 +242,5 @@ static async Task SeedDefaultAdminAsync(WebApplication app)
     catch (Exception ex)
     {
         logger.LogError(ex, "Skipping startup admin seed because database is not currently reachable.");
-    var adminEmail = app.Configuration["Seed:AdminEmail"] ?? "admin@adu.africa";
-    var adminPassword = app.Configuration["Seed:AdminPassword"] ?? "Admin2026!";
-    var adminFullName = app.Configuration["Seed:AdminFullName"] ?? "ADU Administrator";
-
-    var adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
-    if (adminUser is null)
-    {
-        adminUser = new User
-        {
-            Email = adminEmail,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
-            EmailConfirmedAt = DateTime.UtcNow,
-            RawUserMetaData = "{\"full_name\":\"ADU Administrator\"}",
-        };
-        db.Users.Add(adminUser);
-        await db.SaveChangesAsync();
-        logger.LogInformation("Seeded default admin user {Email}.", adminEmail);
-    }
-
-    var profileExists = await db.Profiles.AnyAsync(p => p.UserId == adminUser.Id);
-    if (!profileExists)
-    {
-        db.Profiles.Add(new Profile
-        {
-            UserId = adminUser.Id,
-            FullName = adminFullName,
-        });
-    }
-
-    var roleExists = await db.UserRoles.AnyAsync(r => r.UserId == adminUser.Id && r.Role == AppRole.Admin);
-    if (!roleExists)
-    {
-        db.UserRoles.Add(new UserRole
-        {
-            UserId = adminUser.Id,
-            Role = AppRole.Admin,
-        });
-    }
-
-    if (!profileExists || !roleExists)
-    {
-        await db.SaveChangesAsync();
-        logger.LogInformation("Ensured admin profile/role for {Email}.", adminEmail);
     }
 }

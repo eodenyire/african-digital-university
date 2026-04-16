@@ -206,10 +206,12 @@ For full backend setup details, see [`backend-csharp/README.md`](backend-csharp/
 
 High-level flow:
 
-1. Set up PostgreSQL and the C# API project.
-2. Run API (default: `http://localhost:5000`).
-3. Set `VITE_CSHARP_API_URL=http://localhost:5000`.
-4. Start frontend and verify backend badge shows **C# API** when healthy.
+1. Provision a Neon PostgreSQL database.
+2. Set `ConnectionStrings__DefaultConnection` to your Neon connection string.
+3. Apply EF Core migrations and seed course/lesson data.
+4. Run API (default: `http://localhost:5000`).
+5. Set `VITE_CSHARP_API_URL=http://localhost:5000`.
+6. Start frontend and verify backend badge shows **C# API** when healthy.
 
 ---
 
@@ -222,6 +224,18 @@ High-level flow:
   - `supabase/create_db.sql`
   - `supabase/seed_users.sql`
   - `supabase/seed_application.sql`
+
+### Neon + C# backend seed data
+
+After running `dotnet ef database update`, seed the core course/lesson data using:
+
+```bash
+export NEON_URL="postgresql://neondb_owner:<PASSWORD>@ep-fancy-lake-amk2g54j-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+psql "$NEON_URL" -f supabase/migrations/20260416000001_se_courses_seed.sql
+psql "$NEON_URL" -f supabase/migrations/20260416000003_lesson_content_seed.sql
+```
+
+Avoid running the Supabase RLS/schema migrations against the C# database.
 
 ### Course content pipeline
 
