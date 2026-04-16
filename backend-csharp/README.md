@@ -101,6 +101,7 @@ export NEON_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.te
 export ConnectionStrings__SupabaseConnection="Host=db...;Database=postgres;..."
 export SUPABASE_DB_URL="postgresql://postgres:<PASSWORD>@db.ixswfwzseawgdkmdomkk.supabase.co:5432/postgres?sslmode=require"
 export SUPABASE_DATABASE_URL="postgresql://postgres:<PASSWORD>@db.ixswfwzseawgdkmdomkk.supabase.co:5432/postgres?sslmode=require"
+export SUPABASE_CONNECTION_STRING="postgresql://postgres:<PASSWORD>@db.ixswfwzseawgdkmdomkk.supabase.co:5432/postgres?sslmode=require"
 export SUPABASE_DB_PASSWORD="<PASSWORD>" # replaces YOUR_SUPABASE_DB_PASSWORD in appsettings.json
 export Jwt__Key="your-production-secret"
 export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
@@ -292,6 +293,7 @@ Obtain a token via `POST /auth/signin` or `POST /auth/signup`.
 | `ConnectionStrings__SupabaseConnection` | Supabase PostgreSQL connection string (optional) | placeholder |
 | `SUPABASE_DB_URL` | Supabase PostgreSQL connection URL fallback (postgresql://...) | unset |
 | `SUPABASE_DATABASE_URL` | Supabase PostgreSQL connection URL fallback (postgresql://...) | unset |
+| `SUPABASE_CONNECTION_STRING` | Supabase PostgreSQL connection URL fallback (postgresql://...) | unset |
 | `SUPABASE_DB_PASSWORD` | Supabase DB password (replaces placeholder in appsettings.json) | unset |
 | `Jwt__Key` | JWT signing key (min 32 chars) | `adu-super-secret-jwt-key-min-32-characters!!` |
 | `Jwt__Issuer` | JWT issuer | `adu-api` |

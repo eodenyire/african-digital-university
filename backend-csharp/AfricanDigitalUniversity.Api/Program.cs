@@ -18,9 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 //    the primary connection.
 var defaultConn = ResolveDefaultConnection(builder.Configuration);
 var supabaseConn = ResolveSupabaseConnection(builder.Configuration);
+var supabaseInfo = new SupabaseConnectionInfo(supabaseConn);
 
-var supabaseConfigured = !string.IsNullOrWhiteSpace(supabaseConn)
-    && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal);
+var supabaseConfigured = supabaseInfo.IsConfigured;
 
 var defaultConfigured = !string.IsNullOrWhiteSpace(defaultConn);
 var defaultIsLocalhost = defaultConfigured
@@ -39,13 +39,14 @@ if (string.IsNullOrWhiteSpace(primaryConn))
     throw new InvalidOperationException(
         "No valid primary database connection string configured. " +
         "Provide ConnectionStrings__DefaultConnection (or DATABASE_URL/NEON_DATABASE_URL/NEON_URL) " +
-        "or ConnectionStrings__SupabaseConnection (SUPABASE_DB_URL/SUPABASE_DATABASE_URL/SUPABASE_DB_PASSWORD) " +
+        "or ConnectionStrings__SupabaseConnection (SUPABASE_DB_URL/SUPABASE_DATABASE_URL/SUPABASE_CONNECTION_STRING/SUPABASE_DB_PASSWORD) " +
         "in non-development environments.");
 
 var supabaseReplicationEnabled = supabaseConfigured
     && !string.Equals(primaryConn, supabaseConn, StringComparison.Ordinal);
 
 builder.Services.AddSingleton<SupabaseReplicationInterceptor>();
+builder.Services.AddSingleton(supabaseInfo);
 builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {
     options.UseNpgsql(primaryConn);
@@ -228,13 +229,7 @@ static string ResolveSupabaseConnection(IConfiguration configuration)
             ?? configuration["SUPABASE_CONNECTION_STRING"];
     }
 
-    var normalized = NormalizePostgresConnectionString(configured ?? "");
-    if (!string.IsNullOrWhiteSpace(normalized))
-    {
-        configuration["ConnectionStrings:SupabaseConnection"] = normalized;
-    }
-
-    return normalized;
+    return NormalizePostgresConnectionString(configured ?? "");
 }
 
 static string NormalizePostgresConnectionString(string input)

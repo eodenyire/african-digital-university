@@ -12,13 +12,10 @@ namespace AfricanDigitalUniversity.Api.Data;
 /// </summary>
 public class SupabaseReplicationInterceptor(
     IServiceScopeFactory scopeFactory,
-    IConfiguration configuration,
+    SupabaseConnectionInfo supabaseInfo,
     ILogger<SupabaseReplicationInterceptor> logger) : SaveChangesInterceptor
 {
-    private bool IsSupabaseEnabled =>
-        !string.IsNullOrWhiteSpace(configuration.GetConnectionString("SupabaseConnection"))
-        && !configuration.GetConnectionString("SupabaseConnection")!
-               .Contains("YOUR_SUPABASE_DB_PASSWORD");
+    private bool IsSupabaseEnabled => supabaseInfo.IsConfigured;
 
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
