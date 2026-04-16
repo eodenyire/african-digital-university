@@ -23,19 +23,24 @@ var supabaseConn = NormalizePostgresConnectionString(
 var supabaseConfigured = !string.IsNullOrWhiteSpace(supabaseConn)
     && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal);
 
-var defaultIsLocalhost = defaultConn.Contains("Host=localhost", StringComparison.OrdinalIgnoreCase)
-    || defaultConn.Contains("Host=127.0.0.1", StringComparison.OrdinalIgnoreCase)
-    || defaultConn.Contains("tcp://localhost", StringComparison.OrdinalIgnoreCase)
-    || defaultConn.Contains("tcp://127.0.0.1", StringComparison.OrdinalIgnoreCase);
+var defaultConfigured = !string.IsNullOrWhiteSpace(defaultConn);
+var defaultIsLocalhost = defaultConfigured
+    && (defaultConn.Contains("Host=localhost", StringComparison.OrdinalIgnoreCase)
+        || defaultConn.Contains("Host=127.0.0.1", StringComparison.OrdinalIgnoreCase)
+        || defaultConn.Contains("tcp://localhost", StringComparison.OrdinalIgnoreCase)
+        || defaultConn.Contains("tcp://127.0.0.1", StringComparison.OrdinalIgnoreCase));
 
 var useSupabaseAsPrimary = !builder.Environment.IsDevelopment()
-    && defaultIsLocalhost
-    && supabaseConfigured;
+    && supabaseConfigured
+    && (!defaultConfigured || defaultIsLocalhost);
 
 var primaryConn = useSupabaseAsPrimary ? supabaseConn : defaultConn;
 
 if (string.IsNullOrWhiteSpace(primaryConn))
-    throw new InvalidOperationException("No valid primary database connection string configured.");
+    throw new InvalidOperationException(
+        "No valid primary database connection string configured. " +
+        "Provide ConnectionStrings__DefaultConnection (or DATABASE_URL/NEON_DATABASE_URL/NEON_URL) " +
+        "or ConnectionStrings__SupabaseConnection in non-development environments.");
 
 var supabaseReplicationEnabled = supabaseConfigured
     && !string.Equals(primaryConn, supabaseConn, StringComparison.Ordinal);
@@ -63,7 +68,10 @@ else
 if (useSupabaseAsPrimary)
 {
     var startupLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<Program>();
-    startupLogger.LogInformation("DefaultConnection points to localhost; using SupabaseConnection as primary database.");
+    var reason = defaultConfigured
+        ? "DefaultConnection points to localhost"
+        : "DefaultConnection is not configured";
+    startupLogger.LogInformation("Using SupabaseConnection as primary database because {Reason}.", reason);
 }
 
 if (!supabaseReplicationEnabled)

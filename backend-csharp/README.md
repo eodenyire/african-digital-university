@@ -105,6 +105,7 @@ export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
 
 ### Hosted deployment behavior (Render/Fly/etc.)
 
+- If `DefaultConnection` is missing/placeholder in a non-development environment, the API automatically uses `SupabaseConnection` as the primary database (when configured).
 - If `DefaultConnection` points to localhost in a non-development environment, the API automatically uses `SupabaseConnection` as the primary database (when configured).
 - Supabase replication is enabled only when `SupabaseConnection` is configured **and** it is different from the active primary connection.
 
