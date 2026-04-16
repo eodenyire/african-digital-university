@@ -229,30 +229,31 @@ static string NormalizePostgresConnectionString(string input)
 
         if (!string.IsNullOrWhiteSpace(uri.Query))
         {
+            var queryKeyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["sslmode"] = "SSL Mode",
+                ["channel_binding"] = "Channel Binding",
+                ["trust_server_certificate"] = "Trust Server Certificate",
+                ["application_name"] = "Application Name",
+                ["connect_timeout"] = "Timeout",
+                ["command_timeout"] = "Command Timeout",
+                ["pooling"] = "Pooling",
+                ["maxpoolsize"] = "Maximum Pool Size",
+                ["minpoolsize"] = "Minimum Pool Size",
+                ["options"] = "Options"
+            };
+
             foreach (var pair in uri.Query.TrimStart('?')
                          .Split('&', StringSplitOptions.RemoveEmptyEntries))
             {
                 var segments = pair.Split('=', 2);
-                if (segments.Length == 0)
-                    continue;
-
                 var key = Uri.UnescapeDataString(segments[0]).Trim();
                 var value = segments.Length > 1 ? Uri.UnescapeDataString(segments[1]).Trim() : string.Empty;
                 if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
                     continue;
 
-                switch (key.ToLowerInvariant())
-                {
-                    case "sslmode":
-                        parts.Add($"SSL Mode={value}");
-                        break;
-                    case "channel_binding":
-                        parts.Add($"Channel Binding={value}");
-                        break;
-                    case "trust_server_certificate":
-                        parts.Add($"Trust Server Certificate={value}");
-                        break;
-                }
+                if (queryKeyMap.TryGetValue(key, out var mappedKey))
+                    parts.Add($"{mappedKey}={value}");
             }
         }
 
