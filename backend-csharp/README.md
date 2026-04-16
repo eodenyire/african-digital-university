@@ -2,14 +2,14 @@
 
 This is a complete C# ASP.NET Core Web API that replicates the ADU Supabase backend. It provides the same REST API surface as the Supabase PostgREST interface consumed by the React frontend, with JWT-based authentication replacing Supabase Auth.
 
-The C# backend uses **two PostgreSQL databases simultaneously** via EF Core:
+The C# backend uses a **primary PostgreSQL database (Neon)** and can optionally replicate to a secondary database:
 
 | Database | Purpose |
 |---|---|
-| `adu-africa` (local) | Primary database — credentials: `admin` / `admin2026@#*` |
-| Supabase PostgreSQL (cloud) | Secondary database — writes are replicated here automatically |
+| Neon PostgreSQL (cloud) | Primary database — used by the API |
+| Supabase PostgreSQL (optional) | Secondary database — writes are replicated here automatically when configured |
 
-Every write to the primary database is transparently mirrored to the Supabase database via `SupabaseReplicationInterceptor`.  Replication is best-effort: if Supabase is unreachable the write to `adu-africa` still succeeds and the error is logged.
+Every write to the primary database can be mirrored to the optional Supabase database via `SupabaseReplicationInterceptor`. Replication is best-effort: if Supabase is unreachable the write to Neon still succeeds and the error is logged.
 
 ---
 
@@ -43,7 +43,7 @@ The React frontend supports automatic failover between backends:
 AfricanDigitalUniversity.Api/
 ├── Controllers/          # One controller per resource
 ├── Data/
-│   ├── AppDbContext.cs               # Primary EF Core DbContext (adu-africa DB)
+│   ├── AppDbContext.cs               # Primary EF Core DbContext (Neon DB)
 │   ├── SupabaseDbContext.cs          # Secondary DbContext (Supabase cloud DB)
 │   └── SupabaseReplicationInterceptor.cs  # Dual-write interceptor
 ├── DTOs/                 # Request/response data transfer objects
@@ -70,25 +70,19 @@ AfricanDigitalUniversity.Api/
 
 ## Setup & running
 
-### 1. Create the `adu-africa` database
+### 1. Provision a Neon database
 
-```sql
--- Run as a PostgreSQL superuser (e.g. postgres)
-CREATE USER admin WITH PASSWORD 'admin2026@#*';
-CREATE DATABASE "adu-africa" OWNER admin;
-GRANT ALL PRIVILEGES ON DATABASE "adu-africa" TO admin;
-```
+Create a Neon project/database and copy the connection string.
 
 ### 2. Configure connection strings
 
-`appsettings.json` is pre-configured for the local `adu-africa` database.
-To enable Supabase replication, replace `YOUR_SUPABASE_DB_PASSWORD` in the
-`SupabaseConnection` string:
+`appsettings.json` is pre-configured with a Neon connection string placeholder.
+Replace `YOUR_NEON_DB_PASSWORD` (or override via environment variables).
 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=adu-africa;Username=admin;Password=admin2026@#*",
+    "DefaultConnection": "Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require",
     "SupabaseConnection": "Host=db.ixswfwzseawgdkmdomkk.supabase.co;Database=postgres;Username=postgres;Password=<YOUR_PASSWORD>;SSL Mode=Require;Trust Server Certificate=true"
   }
 }
@@ -97,10 +91,13 @@ To enable Supabase replication, replace `YOUR_SUPABASE_DB_PASSWORD` in the
 When `SupabaseConnection` contains the placeholder text `YOUR_SUPABASE_DB_PASSWORD`
 the Supabase replication is disabled and the API operates in single-database mode.
 
-For production, use environment variables:
+For production, use environment variables (the API also accepts `postgresql://` URLs and will normalize them automatically):
 
 ```bash
-export ConnectionStrings__DefaultConnection="Host=...;Database=adu-africa;..."
+export ConnectionStrings__DefaultConnection="Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require"
+export DATABASE_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
+export NEON_DATABASE_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
+export NEON_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
 export ConnectionStrings__SupabaseConnection="Host=db...;Database=postgres;..."
 export Jwt__Key="your-production-secret"
 export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
@@ -128,12 +125,28 @@ export Seed__AdminFullName="ADU Administrator"
 
 ### 3. Apply migrations
 
+Ensure the `pgcrypto` extension is enabled (required for `gen_random_uuid()`):
+
+```sql
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+```
+
 ```bash
 cd AfricanDigitalUniversity.Api
 dotnet ef database update
 ```
 
-### 4. Run the API
+### 4. Seed course + lesson data (recommended)
+
+Only run the **data seed** migrations (not the Supabase RLS/schema migrations):
+
+```bash
+export NEON_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
+psql "$NEON_URL" -f ../../supabase/migrations/20260416000001_se_courses_seed.sql
+psql "$NEON_URL" -f ../../supabase/migrations/20260416000003_lesson_content_seed.sql
+```
+
+### 5. Run the API
 
 ```bash
 cd AfricanDigitalUniversity.Api
@@ -268,7 +281,10 @@ Obtain a token via `POST /auth/signin` or `POST /auth/signup`.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string for `adu-africa` | `Host=localhost;Database=adu-africa;Username=admin;Password=admin2026@#*` |
+| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string for Neon | `Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD` |
+| `DATABASE_URL` | Render/Neon URL fallback (postgresql://...) | unset |
+| `NEON_DATABASE_URL` | Neon URL fallback (postgresql://...) | unset |
+| `NEON_URL` | Neon URL fallback (postgresql://...) | unset |
 | `ConnectionStrings__SupabaseConnection` | Supabase PostgreSQL connection string (optional) | placeholder |
 | `Jwt__Key` | JWT signing key (min 32 chars) | `adu-super-secret-jwt-key-min-32-characters!!` |
 | `Jwt__Issuer` | JWT issuer | `adu-api` |
@@ -523,6 +539,9 @@ Obtain a token via `POST /auth/signin` or `POST /auth/signup`.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ConnectionStrings__DefaultConnection` | PostgreSQL connection string | `Host=localhost;Database=adu;Username=postgres;Password=postgres` |
+| `DATABASE_URL` | Render/Neon URL fallback (postgresql://...) | unset |
+| `NEON_DATABASE_URL` | Neon URL fallback (postgresql://...) | unset |
+| `NEON_URL` | Neon URL fallback (postgresql://...) | unset |
 | `Jwt__Key` | JWT signing key (min 32 chars) | `adu-super-secret-jwt-key-min-32-characters!!` |
 | `Jwt__Issuer` | JWT issuer | `adu-api` |
 | `Jwt__Audience` | JWT audience | `adu-frontend` |

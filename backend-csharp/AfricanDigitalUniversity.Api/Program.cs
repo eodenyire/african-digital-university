@@ -16,8 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 //    transparently use SupabaseConnection as primary when configured.
 // 3) Replicate to Supabase only when Supabase is configured and different from
 //    the primary connection.
-var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
-var supabaseConn = builder.Configuration.GetConnectionString("SupabaseConnection") ?? "";
+var defaultConn = ResolveDefaultConnection(builder.Configuration);
+var supabaseConn = NormalizePostgresConnectionString(
+    builder.Configuration.GetConnectionString("SupabaseConnection") ?? "");
 
 var supabaseConfigured = !string.IsNullOrWhiteSpace(supabaseConn)
     && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal);
@@ -186,6 +187,83 @@ app.MapControllers();
 
 app.Run();
 
+static string ResolveDefaultConnection(IConfiguration configuration)
+{
+    var configured = configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrWhiteSpace(configured)
+        || configured.Contains("YOUR_NEON_DB_PASSWORD", StringComparison.Ordinal))
+    {
+        configured = configuration["DATABASE_URL"]
+            ?? configuration["NEON_DATABASE_URL"]
+            ?? configuration["NEON_URL"];
+    }
+
+    return NormalizePostgresConnectionString(configured ?? "");
+}
+
+static string NormalizePostgresConnectionString(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return string.Empty;
+
+    if (input.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        || input.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        const int DefaultPostgresPort = 5432;
+        var uri = new Uri(input);
+        var userInfo = uri.UserInfo.Split(':', 2, StringSplitOptions.RemoveEmptyEntries);
+        var username = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : string.Empty;
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        var parts = new List<string>
+        {
+            $"Host={uri.Host}",
+            $"Port={(uri.Port > 0 ? uri.Port : DefaultPostgresPort)}",
+            $"Database={database}"
+        };
+
+        if (!string.IsNullOrWhiteSpace(username))
+            parts.Add($"Username={username}");
+        if (!string.IsNullOrWhiteSpace(password))
+            parts.Add($"Password={password}");
+
+        if (!string.IsNullOrWhiteSpace(uri.Query))
+        {
+            var queryKeyMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["sslmode"] = "SSL Mode",
+                ["channel_binding"] = "Channel Binding",
+                ["trust_server_certificate"] = "Trust Server Certificate",
+                ["application_name"] = "Application Name",
+                ["connect_timeout"] = "Timeout",
+                ["command_timeout"] = "Command Timeout",
+                ["pooling"] = "Pooling",
+                ["maxpoolsize"] = "Maximum Pool Size",
+                ["minpoolsize"] = "Minimum Pool Size",
+                ["options"] = "Options"
+            };
+
+            foreach (var pair in uri.Query.TrimStart('?')
+                         .Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var segments = pair.Split('=', 2);
+                var key = Uri.UnescapeDataString(segments[0]).Trim();
+                var value = segments.Length > 1 ? Uri.UnescapeDataString(segments[1]).Trim() : string.Empty;
+                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+                    continue;
+
+                if (queryKeyMap.TryGetValue(key, out var mappedKey))
+                    parts.Add($"{mappedKey}={value}");
+            }
+        }
+
+        return string.Join(';', parts);
+    }
+
+    return input;
+}
+
 static async Task SeedDefaultAdminAsync(WebApplication app)
 {
     await using var scope = app.Services.CreateAsyncScope();
@@ -242,48 +320,5 @@ static async Task SeedDefaultAdminAsync(WebApplication app)
     catch (Exception ex)
     {
         logger.LogError(ex, "Skipping startup admin seed because database is not currently reachable.");
-    var adminEmail = app.Configuration["Seed:AdminEmail"] ?? "admin@adu.africa";
-    var adminPassword = app.Configuration["Seed:AdminPassword"] ?? "Admin2026!";
-    var adminFullName = app.Configuration["Seed:AdminFullName"] ?? "ADU Administrator";
-
-    var adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
-    if (adminUser is null)
-    {
-        adminUser = new User
-        {
-            Email = adminEmail,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
-            EmailConfirmedAt = DateTime.UtcNow,
-            RawUserMetaData = "{\"full_name\":\"ADU Administrator\"}",
-        };
-        db.Users.Add(adminUser);
-        await db.SaveChangesAsync();
-        logger.LogInformation("Seeded default admin user {Email}.", adminEmail);
-    }
-
-    var profileExists = await db.Profiles.AnyAsync(p => p.UserId == adminUser.Id);
-    if (!profileExists)
-    {
-        db.Profiles.Add(new Profile
-        {
-            UserId = adminUser.Id,
-            FullName = adminFullName,
-        });
-    }
-
-    var roleExists = await db.UserRoles.AnyAsync(r => r.UserId == adminUser.Id && r.Role == AppRole.Admin);
-    if (!roleExists)
-    {
-        db.UserRoles.Add(new UserRole
-        {
-            UserId = adminUser.Id,
-            Role = AppRole.Admin,
-        });
-    }
-
-    if (!profileExists || !roleExists)
-    {
-        await db.SaveChangesAsync();
-        logger.LogInformation("Ensured admin profile/role for {Email}.", adminEmail);
     }
 }
