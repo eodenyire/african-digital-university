@@ -106,6 +106,11 @@ export Jwt__Key="your-production-secret"
 export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
 ```
 
+### Hosted deployment behavior (Render/Fly/etc.)
+
+- If `DefaultConnection` points to localhost in a non-development environment, the API automatically uses `SupabaseConnection` as the primary database (when configured).
+- Supabase replication is enabled only when `SupabaseConnection` is configured **and** it is different from the active primary connection.
+
 ### Default admin seed account
 
 On startup, the API ensures a default admin account exists (idempotent seed):

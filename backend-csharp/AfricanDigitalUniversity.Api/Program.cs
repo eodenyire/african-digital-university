@@ -9,25 +9,44 @@ using AfricanDigitalUniversity.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Primary database (local adu-africa PostgreSQL) ─────────────────────────
-builder.Services.AddSingleton<SupabaseReplicationInterceptor>();
+// ── Database connection strategy ────────────────────────────────────────────
+// Priority:
+// 1) Use DefaultConnection when explicitly configured.
+// 2) In hosted/non-dev environments, if DefaultConnection points to localhost,
+//    transparently use SupabaseConnection as primary when configured.
+// 3) Replicate to Supabase only when Supabase is configured and different from
+//    the primary connection.
+var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+var supabaseConn = builder.Configuration.GetConnectionString("SupabaseConnection") ?? "";
 
+var supabaseConfigured = !string.IsNullOrWhiteSpace(supabaseConn)
+    && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal);
+
+var defaultIsLocalhost = defaultConn.Contains("Host=localhost", StringComparison.OrdinalIgnoreCase)
+    || defaultConn.Contains("Host=127.0.0.1", StringComparison.OrdinalIgnoreCase)
+    || defaultConn.Contains("tcp://localhost", StringComparison.OrdinalIgnoreCase)
+    || defaultConn.Contains("tcp://127.0.0.1", StringComparison.OrdinalIgnoreCase);
+
+var useSupabaseAsPrimary = !builder.Environment.IsDevelopment()
+    && defaultIsLocalhost
+    && supabaseConfigured;
+
+var primaryConn = useSupabaseAsPrimary ? supabaseConn : defaultConn;
+
+if (string.IsNullOrWhiteSpace(primaryConn))
+    throw new InvalidOperationException("No valid primary database connection string configured.");
+
+var supabaseReplicationEnabled = supabaseConfigured
+    && !string.Equals(primaryConn, supabaseConn, StringComparison.Ordinal);
+
+builder.Services.AddSingleton<SupabaseReplicationInterceptor>();
 builder.Services.AddDbContext<AppDbContext>((sp, options) =>
 {
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseNpgsql(primaryConn);
     options.AddInterceptors(sp.GetRequiredService<SupabaseReplicationInterceptor>());
 });
 
-// ── Secondary database (Supabase cloud PostgreSQL) ─────────────────────────
-// Used by SupabaseReplicationInterceptor to mirror every write made to the
-// primary database.  Registration is skipped when the connection string is
-// absent or still contains the placeholder password so the app starts cleanly
-// in environments where Supabase credentials have not yet been configured.
-var supabaseConn = builder.Configuration.GetConnectionString("SupabaseConnection") ?? "";
-var supabaseEnabled = !string.IsNullOrWhiteSpace(supabaseConn)
-    && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD");
-
-if (supabaseEnabled)
+if (supabaseReplicationEnabled)
 {
     builder.Services.AddDbContext<SupabaseDbContext>(options =>
         options.UseNpgsql(supabaseConn));
@@ -37,13 +56,19 @@ else
     // Register a null/dummy factory so the interceptor can safely request the
     // service and handle the absence gracefully.
     builder.Services.AddDbContext<SupabaseDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseNpgsql(primaryConn));
 }
 
-if (!supabaseEnabled)
+if (useSupabaseAsPrimary)
 {
     var startupLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<Program>();
-    startupLogger.LogWarning("SupabaseConnection not configured – Supabase replication disabled.");
+    startupLogger.LogInformation("DefaultConnection points to localhost; using SupabaseConnection as primary database.");
+}
+
+if (!supabaseReplicationEnabled)
+{
+    var startupLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger<Program>();
+    startupLogger.LogWarning("Supabase replication disabled (SupabaseConnection missing/placeholder or already used as primary).");
 }
 
 // ── JWT Authentication ─────────────────────────────────────────────────────
@@ -167,6 +192,56 @@ static async Task SeedDefaultAdminAsync(WebApplication app)
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("StartupSeed");
 
+    try
+    {
+        var adminEmail = app.Configuration["Seed:AdminEmail"] ?? "admin@adu.africa";
+        var adminPassword = app.Configuration["Seed:AdminPassword"] ?? "Admin2026!";
+        var adminFullName = app.Configuration["Seed:AdminFullName"] ?? "ADU Administrator";
+
+        var adminUser = await db.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+        if (adminUser is null)
+        {
+            adminUser = new User
+            {
+                Email = adminEmail,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(adminPassword),
+                EmailConfirmedAt = DateTime.UtcNow,
+                RawUserMetaData = "{\"full_name\":\"ADU Administrator\"}",
+            };
+            db.Users.Add(adminUser);
+            await db.SaveChangesAsync();
+            logger.LogInformation("Seeded default admin user {Email}.", adminEmail);
+        }
+
+        var profileExists = await db.Profiles.AnyAsync(p => p.UserId == adminUser.Id);
+        if (!profileExists)
+        {
+            db.Profiles.Add(new Profile
+            {
+                UserId = adminUser.Id,
+                FullName = adminFullName,
+            });
+        }
+
+        var roleExists = await db.UserRoles.AnyAsync(r => r.UserId == adminUser.Id && r.Role == AppRole.Admin);
+        if (!roleExists)
+        {
+            db.UserRoles.Add(new UserRole
+            {
+                UserId = adminUser.Id,
+                Role = AppRole.Admin,
+            });
+        }
+
+        if (!profileExists || !roleExists)
+        {
+            await db.SaveChangesAsync();
+            logger.LogInformation("Ensured admin profile/role for {Email}.", adminEmail);
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Skipping startup admin seed because database is not currently reachable.");
     var adminEmail = app.Configuration["Seed:AdminEmail"] ?? "admin@adu.africa";
     var adminPassword = app.Configuration["Seed:AdminPassword"] ?? "Admin2026!";
     var adminFullName = app.Configuration["Seed:AdminFullName"] ?? "ADU Administrator";
