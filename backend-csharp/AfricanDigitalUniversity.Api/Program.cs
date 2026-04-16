@@ -16,8 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 //    transparently use SupabaseConnection as primary when configured.
 // 3) Replicate to Supabase only when Supabase is configured and different from
 //    the primary connection.
-var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
-var supabaseConn = builder.Configuration.GetConnectionString("SupabaseConnection") ?? "";
+var defaultConn = ResolveDefaultConnection(builder.Configuration);
+var supabaseConn = NormalizePostgresConnectionString(
+    builder.Configuration.GetConnectionString("SupabaseConnection") ?? "");
 
 var supabaseConfigured = !string.IsNullOrWhiteSpace(supabaseConn)
     && !supabaseConn.Contains("YOUR_SUPABASE_DB_PASSWORD", StringComparison.Ordinal);
@@ -185,6 +186,81 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy", backend = "csha
 app.MapControllers();
 
 app.Run();
+
+static string ResolveDefaultConnection(IConfiguration configuration)
+{
+    var configured = configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrWhiteSpace(configured)
+        || configured.Contains("YOUR_NEON_DB_PASSWORD", StringComparison.Ordinal))
+    {
+        configured = configuration["DATABASE_URL"]
+            ?? configuration["NEON_DATABASE_URL"]
+            ?? configuration["NEON_URL"];
+    }
+
+    return NormalizePostgresConnectionString(configured ?? "");
+}
+
+static string NormalizePostgresConnectionString(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return string.Empty;
+
+    if (input.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        || input.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        var uri = new Uri(input);
+        var userInfo = uri.UserInfo.Split(':', 2, StringSplitOptions.RemoveEmptyEntries);
+        var username = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : string.Empty;
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        var parts = new List<string>
+        {
+            $"Host={uri.Host}",
+            $"Port={(uri.Port > 0 ? uri.Port : 5432)}",
+            $"Database={database}"
+        };
+
+        if (!string.IsNullOrWhiteSpace(username))
+            parts.Add($"Username={username}");
+        if (!string.IsNullOrWhiteSpace(password))
+            parts.Add($"Password={password}");
+
+        if (!string.IsNullOrWhiteSpace(uri.Query))
+        {
+            foreach (var pair in uri.Query.TrimStart('?')
+                         .Split('&', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var segments = pair.Split('=', 2);
+                if (segments.Length == 0)
+                    continue;
+
+                var key = Uri.UnescapeDataString(segments[0]).Trim();
+                var value = segments.Length > 1 ? Uri.UnescapeDataString(segments[1]).Trim() : string.Empty;
+                if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(value))
+                    continue;
+
+                switch (key.ToLowerInvariant())
+                {
+                    case "sslmode":
+                        parts.Add($"SSL Mode={value}");
+                        break;
+                    case "channel_binding":
+                        parts.Add($"Channel Binding={value}");
+                        break;
+                    case "trust_server_certificate":
+                        parts.Add($"Trust Server Certificate={value}");
+                        break;
+                }
+            }
+        }
+
+        return string.Join(';', parts);
+    }
+
+    return input;
+}
 
 static async Task SeedDefaultAdminAsync(WebApplication app)
 {

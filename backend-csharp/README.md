@@ -91,10 +91,13 @@ Replace `YOUR_NEON_DB_PASSWORD` (or override via environment variables).
 When `SupabaseConnection` contains the placeholder text `YOUR_SUPABASE_DB_PASSWORD`
 the Supabase replication is disabled and the API operates in single-database mode.
 
-For production, use environment variables:
+For production, use environment variables (the API also accepts `postgresql://` URLs and will normalize them automatically):
 
 ```bash
 export ConnectionStrings__DefaultConnection="Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require"
+export DATABASE_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
+export NEON_DATABASE_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
+export NEON_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
 export ConnectionStrings__SupabaseConnection="Host=db...;Database=postgres;..."
 export Jwt__Key="your-production-secret"
 export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
@@ -279,6 +282,9 @@ Obtain a token via `POST /auth/signin` or `POST /auth/signup`.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ConnectionStrings__DefaultConnection` | PostgreSQL connection string for Neon | `Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD` |
+| `DATABASE_URL` | Render/Neon URL fallback (postgresql://...) | unset |
+| `NEON_DATABASE_URL` | Neon URL fallback (postgresql://...) | unset |
+| `NEON_URL` | Neon URL fallback (postgresql://...) | unset |
 | `ConnectionStrings__SupabaseConnection` | Supabase PostgreSQL connection string (optional) | placeholder |
 | `Jwt__Key` | JWT signing key (min 32 chars) | `adu-super-secret-jwt-key-min-32-characters!!` |
 | `Jwt__Issuer` | JWT issuer | `adu-api` |
@@ -533,6 +539,9 @@ Obtain a token via `POST /auth/signin` or `POST /auth/signup`.
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `ConnectionStrings__DefaultConnection` | PostgreSQL connection string | `Host=localhost;Database=adu;Username=postgres;Password=postgres` |
+| `DATABASE_URL` | Render/Neon URL fallback (postgresql://...) | unset |
+| `NEON_DATABASE_URL` | Neon URL fallback (postgresql://...) | unset |
+| `NEON_URL` | Neon URL fallback (postgresql://...) | unset |
 | `Jwt__Key` | JWT signing key (min 32 chars) | `adu-super-secret-jwt-key-min-32-characters!!` |
 | `Jwt__Issuer` | JWT issuer | `adu-api` |
 | `Jwt__Audience` | JWT audience | `adu-frontend` |
