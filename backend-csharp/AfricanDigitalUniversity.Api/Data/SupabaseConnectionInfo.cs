@@ -1,6 +1,6 @@
 namespace AfricanDigitalUniversity.Api.Data;
 
-public sealed record SupabaseConnectionInfo(string ConnectionString)
+public sealed record SupabaseConnectionInfo(string? ConnectionString)
 {
     public bool IsConfigured =>
         !string.IsNullOrWhiteSpace(ConnectionString)
