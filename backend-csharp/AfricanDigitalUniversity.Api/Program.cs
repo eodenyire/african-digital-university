@@ -209,6 +209,7 @@ static string NormalizePostgresConnectionString(string input)
     if (input.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
         || input.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
     {
+        const int DefaultPostgresPort = 5432;
         var uri = new Uri(input);
         var userInfo = uri.UserInfo.Split(':', 2, StringSplitOptions.RemoveEmptyEntries);
         var username = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : string.Empty;
@@ -218,7 +219,7 @@ static string NormalizePostgresConnectionString(string input)
         var parts = new List<string>
         {
             $"Host={uri.Host}",
-            $"Port={(uri.Port > 0 ? uri.Port : 5432)}",
+            $"Port={(uri.Port > 0 ? uri.Port : DefaultPostgresPort)}",
             $"Database={database}"
         };
 
