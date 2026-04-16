@@ -43,7 +43,10 @@ const BackendContext = createContext<BackendContextType>({
 
 export const useBackend = () => useContext(BackendContext);
 
-const CSHARP_URL = (import.meta.env.VITE_CSHARP_API_URL as string | undefined) ?? "";
+const DEFAULT_RENDER_API_URL = "https://african-digital-university-backend.onrender.com";
+const CSHARP_URL =
+  (import.meta.env.VITE_CSHARP_API_URL as string | undefined) ??
+  (import.meta.env.PROD ? DEFAULT_RENDER_API_URL : "");
 const PROBE_INTERVAL_MS = 30_000;
 
 export const BackendProvider = ({ children }: { children: ReactNode }) => {
