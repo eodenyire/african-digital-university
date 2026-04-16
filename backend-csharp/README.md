@@ -103,6 +103,22 @@ For production, use environment variables:
 export ConnectionStrings__DefaultConnection="Host=...;Database=adu-africa;..."
 export ConnectionStrings__SupabaseConnection="Host=db...;Database=postgres;..."
 export Jwt__Key="your-production-secret"
+export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
+```
+
+### Default admin seed account
+
+On startup, the API ensures a default admin account exists (idempotent seed):
+
+- Email: `admin@adu.africa`
+- Password: `Admin2026!`
+
+You can override these with environment variables:
+
+```bash
+export Seed__AdminEmail="admin@adu.africa"
+export Seed__AdminPassword="Admin2026!"
+export Seed__AdminFullName="ADU Administrator"
 ```
 
 ### 3. Apply migrations
