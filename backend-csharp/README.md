@@ -82,7 +82,7 @@ Replace `YOUR_NEON_DB_PASSWORD` (or override via environment variables).
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=ep-fancy-lake-amk2g54j-pooler.c-5.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require",
+    "DefaultConnection": "Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require",
     "SupabaseConnection": "Host=db.ixswfwzseawgdkmdomkk.supabase.co;Database=postgres;Username=postgres;Password=<YOUR_PASSWORD>;SSL Mode=Require;Trust Server Certificate=true"
   }
 }
@@ -94,7 +94,7 @@ the Supabase replication is disabled and the API operates in single-database mod
 For production, use environment variables:
 
 ```bash
-export ConnectionStrings__DefaultConnection="Host=ep-fancy-lake-amk2g54j-pooler.c-5.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require"
+export ConnectionStrings__DefaultConnection="Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD;SSL Mode=Require;Channel Binding=Require"
 export ConnectionStrings__SupabaseConnection="Host=db...;Database=postgres;..."
 export Jwt__Key="your-production-secret"
 export Cors__AllowedOrigins__0="https://your-frontend-domain.com"
@@ -138,7 +138,7 @@ dotnet ef database update
 Only run the **data seed** migrations (not the Supabase RLS/schema migrations):
 
 ```bash
-export NEON_URL="postgresql://neondb_owner:<PASSWORD>@ep-fancy-lake-amk2g54j-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+export NEON_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
 psql "$NEON_URL" -f ../../supabase/migrations/20260416000001_se_courses_seed.sql
 psql "$NEON_URL" -f ../../supabase/migrations/20260416000003_lesson_content_seed.sql
 ```
@@ -278,7 +278,7 @@ Obtain a token via `POST /auth/signin` or `POST /auth/signup`.
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string for Neon | `Host=ep-fancy-lake-amk2g54j-pooler.c-5.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD` |
+| `ConnectionStrings__DefaultConnection` | PostgreSQL connection string for Neon | `Host=your-neon-endpoint.neon.tech;Database=neondb;Username=neondb_owner;Password=YOUR_NEON_DB_PASSWORD` |
 | `ConnectionStrings__SupabaseConnection` | Supabase PostgreSQL connection string (optional) | placeholder |
 | `Jwt__Key` | JWT signing key (min 32 chars) | `adu-super-secret-jwt-key-min-32-characters!!` |
 | `Jwt__Issuer` | JWT issuer | `adu-api` |

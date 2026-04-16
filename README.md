@@ -230,7 +230,7 @@ High-level flow:
 After running `dotnet ef database update`, seed the core course/lesson data using:
 
 ```bash
-export NEON_URL="postgresql://neondb_owner:<PASSWORD>@ep-fancy-lake-amk2g54j-pooler.c-5.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+export NEON_URL="postgresql://neondb_owner:<PASSWORD>@your-neon-endpoint.neon.tech/neondb?sslmode=require&channel_binding=require"
 psql "$NEON_URL" -f supabase/migrations/20260416000001_se_courses_seed.sql
 psql "$NEON_URL" -f supabase/migrations/20260416000003_lesson_content_seed.sql
 ```
